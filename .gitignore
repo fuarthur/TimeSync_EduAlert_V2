@@ -15,5 +15,6 @@
 local.properties
 
 # Project exclude paths
-/app/
+/app/src/androidTest
+/app/src/test
 /gradle/
