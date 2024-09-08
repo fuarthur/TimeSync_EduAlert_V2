@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">TimeSync EduAlert V2</string>
+    <string name="description_icon">App Icon</string>
+    <string name="hint_add_course_button">Add Course</string>
+    <string name="hint_settings_button">Settings</string>
+    <string name="placeholder">Placeholder</string>
+</resources>
