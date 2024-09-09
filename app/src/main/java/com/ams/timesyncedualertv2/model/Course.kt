@@ -1,11 +1,10 @@
 package com.ams.timesyncedualertv2.model
 
-import android.graphics.Color
-import java.time.LocalTime
+import java.util.Date
 
 data class Course(
     val weekday: List<Int>,
-    val times: Pair<LocalTime, LocalTime>,
+    val times: Pair<Date?, Date?>,
     val name: String,
     val location: String,
     val description: String,

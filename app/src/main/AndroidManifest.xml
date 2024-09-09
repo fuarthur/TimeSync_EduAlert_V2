@@ -21,6 +21,10 @@
             android:name=".ui.HomepageActivity"
             android:exported="true" />
 
+        <activity
+            android:name=".ui.AddCourseActivity"
+            android:exported="true" />
+
     </application>
 
 

@@ -4,4 +4,24 @@
     <string name="hint_add_course_button">Add Course</string>
     <string name="hint_settings_button">Settings</string>
     <string name="placeholder">Placeholder</string>
+    <string name="hint_select_weekdays">Select Weekday(s)</string>
+    <string name="hint_monday">Mon.</string>
+    <string name="hint_tuesday">Tue.</string>
+    <string name="hint_wednesday">Wed.</string>
+    <string name="hint_thursday">Thu.</string>
+    <string name="hint_friday">Fri.</string>
+    <string name="hint_select_time">Select Time</string>
+    <string name="hint_start_time">Start Time</string>
+    <string name="hint_select">Select</string>
+    <string name="hint_end_time">End Time</string>
+    <string name="hint_course_name">Course Name</string>
+    <string name="hint_enter_course_name">Enter Course Name</string>
+    <string name="hint_location">Location</string>
+    <string name="hint_enter_location">Enter Location</string>
+    <string name="hint_description">Description</string>
+    <string name="hint_enter_description">Enter Description</string>
+    <string name="hint_color">Select Color</string>
+    <string name="hint_select_color">Select Color</string>
+    <string name="hint_back">Back</string>
+    <string name="hint_submit">Submit</string>
 </resources>
