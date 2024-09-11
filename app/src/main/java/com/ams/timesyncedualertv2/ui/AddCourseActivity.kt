@@ -98,30 +98,72 @@ class AddCourseActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val courseEntity = CourseEntity(
-                weekday = getSelectedWeekdays(),
-                startTime = startTime,
-                endTime = endTime,
-                name = courseName,
-                location = location,
-                description = description,
-                color = selectedColor
-            )
+            // 将 startTime 和 endTime 转换为时间对象
+            val newStartTime = timeFormat.parse(startTime)
+            val newEndTime = timeFormat.parse(endTime)
 
-            // 使用 lifecycleScope 代替 GlobalScope 启动协程
+            // 在协程中查询是否有时间冲突
             lifecycleScope.launch {
-                courseDao.insert(courseEntity)
-                runOnUiThread {
-                    Toast.makeText(
-                        this@AddCourseActivity,
-                        "Course added successfully",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    val intent = Intent(this@AddCourseActivity, HomepageActivity::class.java)
-                    startActivity(intent)
+                var hasConflict = false
+
+                for (weekday in weekdays) {
+                    // 获取当天的所有课程
+                    val existingCourses = courseDao.getCoursesForWeekday(weekday)
+
+                    for (course in existingCourses) {
+                        val existingStartTime = timeFormat.parse(course.startTime)
+                        val existingEndTime = timeFormat.parse(course.endTime)
+
+                        // 检查是否有时间冲突
+                        if (newStartTime != null && newEndTime != null && existingStartTime != null && existingEndTime != null) {
+                            if (newStartTime.before(existingEndTime) && newEndTime.after(
+                                    existingStartTime
+                                )
+                            ) {
+                                hasConflict = true
+                                break
+                            }
+                        }
+                    }
+
+                    if (hasConflict) break
+                }
+
+                // 如果有冲突，提示用户并阻止添加
+                if (hasConflict) {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@AddCourseActivity,
+                            "Time conflict with an existing course",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    // 否则，插入新课程
+                    val courseEntity = CourseEntity(
+                        weekday = weekdays,
+                        startTime = startTime,
+                        endTime = endTime,
+                        name = courseName,
+                        location = location,
+                        description = description,
+                        color = selectedColor
+                    )
+
+                    courseDao.insert(courseEntity)
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@AddCourseActivity,
+                            "Course added successfully",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        val intent = Intent(this@AddCourseActivity, HomepageActivity::class.java)
+                        startActivity(intent)
+                    }
                 }
             }
         }
+
 
         buttonBack.setOnClickListener {
             val intent = Intent(this, HomepageActivity::class.java)
