@@ -1,3 +1,5 @@
+package com.ams.timesyncedualertv2.model
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,9 +9,17 @@ import android.content.Context
 import android.graphics.Color
 import android.widget.Toast
 import com.ams.timesyncedualertv2.R
-import com.ams.timesyncedualertv2.model.CourseEntity
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
-class CourseAdapter(private val context: Context, private val courses: List<CourseEntity>) : RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
+class CourseAdapter(private val context: Context, courses: List<CourseEntity>) : RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
+
+    // 对课程列表按照 startTime 进行排序
+    private val sortedCourses = courses.sortedBy { course ->
+        // 将 startTime 转换为 LocalTime 对象
+        LocalTime.parse(course.startTime, DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()))
+    }
 
     class CourseViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val nameTextView: TextView = view.findViewById(R.id.textView_course_name)
@@ -24,11 +34,12 @@ class CourseAdapter(private val context: Context, private val courses: List<Cour
     }
 
     override fun onBindViewHolder(holder: CourseViewHolder, position: Int) {
-        val course = courses[position]
+        val course = sortedCourses[position]
         holder.nameTextView.text = course.name
         holder.locationTextView.text = course.location
         holder.timeTextView.text = context.getString(R.string.course_time_format, course.startTime, course.endTime)
         holder.cardView.background.setTint(course.color)
+
         // 根据背景颜色调整字体颜色
         val textColor = if (isColorDark(course.color)) {
             Color.WHITE // 如果背景颜色较暗，字体使用白色
@@ -41,15 +52,13 @@ class CourseAdapter(private val context: Context, private val courses: List<Cour
         holder.locationTextView.setTextColor(textColor)
         holder.timeTextView.setTextColor(textColor)
 
-
         holder.itemView.setOnClickListener {
-            //TODO:Handle item click here if needed
             Toast.makeText(context, "Clicked on ${course.name}", Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun getItemCount(): Int {
-        return courses.size
+        return sortedCourses.size
     }
 
     private fun isColorDark(color: Int): Boolean {

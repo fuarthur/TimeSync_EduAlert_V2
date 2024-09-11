@@ -1,6 +1,5 @@
 package com.ams.timesyncedualertv2.ui
 
-import CourseAdapter
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,6 +13,7 @@ import androidx.room.Room
 import com.ams.timesyncedualertv2.R
 import com.ams.timesyncedualertv2.db.AppDatabase
 import com.ams.timesyncedualertv2.db.CourseDao
+import com.ams.timesyncedualertv2.model.CourseAdapter
 import com.ams.timesyncedualertv2.model.CourseEntity
 import kotlinx.coroutines.launch
 
