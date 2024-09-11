@@ -1,17 +1,27 @@
 package com.ams.timesyncedualertv2.ui
 
+import CourseAdapter
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
 import com.ams.timesyncedualertv2.R
-import com.ams.timesyncedualertv2.model.Course
-import com.ams.timesyncedualertv2.model.CourseAdapter
+import com.ams.timesyncedualertv2.db.AppDatabase
+import com.ams.timesyncedualertv2.db.CourseDao
+import com.ams.timesyncedualertv2.model.CourseEntity
+import kotlinx.coroutines.launch
 
 class WeekdayFragment : Fragment() {
+
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var courseAdapter: CourseAdapter
+    private lateinit var courseDao: CourseDao // 声明 courseDao
 
     companion object {
         private const val ARG_WEEKDAY = "weekday"
@@ -30,28 +40,55 @@ class WeekdayFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // 绑定 Fragment 的布局文件
+        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_weekday, container, false)
 
-        // 获取传递的 weekday 参数
-        val weekday = arguments?.getString(ARG_WEEKDAY)
-
-        // 获取 RecyclerView
-        val recyclerView = view.findViewById<RecyclerView>(R.id.courses_recycler_view)
-
-        // 设置 LayoutManager
+        // 初始化 RecyclerView
+        recyclerView = view.findViewById(R.id.courses_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-        // 设置 Adapter，获取相应 weekday 的课程数据
-        val courses = getCoursesForWeekday(weekday)
-        recyclerView.adapter = CourseAdapter(courses)
+        // 获取数据库实例并初始化 courseDao
+        val db = Room.databaseBuilder(
+            requireContext().applicationContext,
+            AppDatabase::class.java, "courses.db"
+        ).build()
+        courseDao = db.courseDao() // 初始化 courseDao
+
+        // 使用 viewLifecycleOwner.lifecycleScope 启动协程，保证协程在 Fragment 销毁时自动取消
+        viewLifecycleOwner.lifecycleScope.launch {
+            val weekday = arguments?.getString(ARG_WEEKDAY) ?: ""
+            val courses = getCoursesForWeekday(weekday)
+
+            // 更新 UI
+            if (courses.isNotEmpty()) {
+                courseAdapter = CourseAdapter(requireContext(), courses)
+                recyclerView.adapter = courseAdapter
+            }
+        }
 
         return view
     }
 
-    // 根据 weekday 获取对应的课程数据
-    private fun getCoursesForWeekday(weekday: String?): List<Course> {
-        // TODO: 未来通过数据库或用户输入的方式来实现
-        return emptyList()
+    private suspend fun getCoursesForWeekday(weekday: String): List<CourseEntity> {
+        val weekdayInt = mapWeekdayToInt(weekday)
+        Log.d("WeekdayFragment", "getCoursesForWeekday called with weekday: $weekday ($weekdayInt)")
+
+
+        return if (weekdayInt != -1) {
+            courseDao.getCoursesForWeekday(weekdayInt)
+        } else {
+            emptyList()
+        }
+    }
+
+    private fun mapWeekdayToInt(weekday: String): Int {
+        return when (weekday) {
+            "Mon." -> 1
+            "Tue." -> 2
+            "Wed." -> 3
+            "Thu." -> 4
+            "Fri." -> 5
+            else -> -1
+        }
     }
 }

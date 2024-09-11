@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.ams.timesyncedualertv2.R
-import com.ams.timesyncedualertv2.model.Course
 import yuku.ambilwarna.AmbilWarnaDialog
 import android.app.TimePickerDialog
 import android.content.Intent
@@ -13,11 +12,15 @@ import android.widget.CheckBox
 import android.widget.EditText
 import java.util.Calendar
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
+import androidx.room.Room
+import com.ams.timesyncedualertv2.db.AppDatabase
+import com.ams.timesyncedualertv2.model.CourseEntity
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class AddCourseActivity : AppCompatActivity() {
-
     private var startTime: String = ""
     private var endTime: String = ""
     private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -49,7 +52,11 @@ class AddCourseActivity : AppCompatActivity() {
                     startTime = selectedTime
                     buttonSelectStartTime.text = startTime
                 } else {
-                    Toast.makeText(this, "Start time must be earlier than end time", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "Start time must be earlier than end time",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -60,14 +67,26 @@ class AddCourseActivity : AppCompatActivity() {
                     endTime = selectedTime
                     buttonSelectEndTime.text = endTime
                 } else {
-                    Toast.makeText(this, "End time must be later than start time", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "End time must be later than start time",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
 
+        buttonSelectColor.setBackgroundColor(selectedColor)
         buttonSelectColor.setOnClickListener {
             openColorPickerDialog()
         }
+
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "courses.db"
+        ).build()
+
+        val courseDao = db.courseDao()
 
         buttonSubmit.setOnClickListener {
             val weekdays = getSelectedWeekdays()
@@ -79,18 +98,29 @@ class AddCourseActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val course = Course(
-                weekday = weekdays,
-                times = Pair(timeFormat.parse(startTime), timeFormat.parse(endTime)),
+            val courseEntity = CourseEntity(
+                weekday = getSelectedWeekdays(),
+                startTime = startTime,
+                endTime = endTime,
                 name = courseName,
                 location = location,
                 description = description,
                 color = selectedColor
             )
 
-            Toast.makeText(this, "Course added successfully$course", Toast.LENGTH_SHORT).show()
-
-            // TODO: 保存，数据库？local storage？
+            // 使用 lifecycleScope 代替 GlobalScope 启动协程
+            lifecycleScope.launch {
+                courseDao.insert(courseEntity)
+                runOnUiThread {
+                    Toast.makeText(
+                        this@AddCourseActivity,
+                        "Course added successfully",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    val intent = Intent(this@AddCourseActivity, HomepageActivity::class.java)
+                    startActivity(intent)
+                }
+            }
         }
 
         buttonBack.setOnClickListener {
@@ -105,7 +135,8 @@ class AddCourseActivity : AppCompatActivity() {
         val minute = calendar.get(Calendar.MINUTE)
 
         val timePickerDialog = TimePickerDialog(this, { _, selectedHour, selectedMinute ->
-            val formattedTime = String.format("%02d:%02d", selectedHour, selectedMinute)
+            val formattedTime =
+                String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute)
             onTimeSelected(formattedTime)
         }, hour, minute, true)
 
@@ -123,16 +154,17 @@ class AddCourseActivity : AppCompatActivity() {
     }
 
     private fun openColorPickerDialog() {
-        val colorPicker = AmbilWarnaDialog(this, selectedColor, object : AmbilWarnaDialog.OnAmbilWarnaListener {
-            override fun onOk(dialog: AmbilWarnaDialog, color: Int) {
-                selectedColor = color
-                buttonSelectColor.setBackgroundColor(selectedColor)
-            }
+        val colorPicker =
+            AmbilWarnaDialog(this, selectedColor, object : AmbilWarnaDialog.OnAmbilWarnaListener {
+                override fun onOk(dialog: AmbilWarnaDialog, color: Int) {
+                    selectedColor = color
+                    buttonSelectColor.setBackgroundColor(selectedColor)
+                }
 
-            override fun onCancel(dialog: AmbilWarnaDialog) {
-                // do nothing
-            }
-        })
+                override fun onCancel(dialog: AmbilWarnaDialog) {
+                    // do nothing
+                }
+            })
         colorPicker.show()
     }
 
@@ -146,7 +178,14 @@ class AddCourseActivity : AppCompatActivity() {
         return weekdays
     }
 
-    private fun checkElements(weekdays: List<Int>, startTime: String, endTime: String, courseName: String, location: String, description: String): Boolean {
+    private fun checkElements(
+        weekdays: List<Int>,
+        startTime: String,
+        endTime: String,
+        courseName: String,
+        location: String,
+        description: String
+    ): Boolean {
         if (weekdays.isEmpty()) {
             Toast.makeText(this, "Please select at least one weekday", Toast.LENGTH_SHORT).show()
             return false

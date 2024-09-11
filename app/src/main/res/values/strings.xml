@@ -24,4 +24,5 @@
     <string name="hint_select_color">Select Color</string>
     <string name="hint_back">Back</string>
     <string name="hint_submit">Submit</string>
+    <string name="course_time_format">%1$s - %2$s</string>
 </resources>
