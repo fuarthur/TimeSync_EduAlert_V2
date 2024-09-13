@@ -27,6 +27,8 @@
 
         <activity android:name=".ui.CourseDetailsActivity" />
 
+        <activity android:name=".ui.SettingsActivity" />
+
 
     </application>
 

@@ -35,29 +35,16 @@ class HomepageActivity : AppCompatActivity() {
             tab.text = adapter.weekdays[position]
         }.attach()
 
-        // TODO: Delete this after testing
+
         settingButton.setOnClickListener {
-            debugDeleteAll()
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
         }
 
         addCourseButton.setOnClickListener {
-            val intent = Intent(this, CourseDetailsActivity::class.java)
+            val intent = Intent(this, CourseActivity::class.java)
             startActivity(intent)
         }
     }
 
-    private fun debugDeleteAll() {
-        val db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "courses.db"
-        ).build()
-
-        val courseDao = db.courseDao()
-
-        lifecycleScope.launch {
-            courseDao.deleteAllCourses()
-            Toast.makeText(this@HomepageActivity, "All courses deleted", Toast.LENGTH_SHORT).show()
-            recreate()
-        }
-    }
 }

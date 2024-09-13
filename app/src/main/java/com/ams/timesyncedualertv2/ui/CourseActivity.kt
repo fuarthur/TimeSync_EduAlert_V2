@@ -109,49 +109,90 @@ class CourseActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            // 将 startTime 和 endTime 转换为时间对象
+            val newStartTime = timeFormat.parse(startTime)
+            val newEndTime = timeFormat.parse(endTime)
+
             lifecycleScope.launch {
-                // 编辑课程时，覆盖已有课程
-                if (courseId != -1) {
-                    courseDao.updateCourse(
-                        courseId,
-                        weekdays,
-                        startTime,
-                        endTime,
-                        courseName,
-                        location,
-                        description,
-                        selectedColor
-                    )
+                var hasConflict = false
+
+                for (weekday in weekdays) {
+                    // 获取当天的所有课程
+                    val existingCourses = courseDao.getCoursesForWeekday(weekday)
+
+                    for (course in existingCourses) {
+                        val existingStartTime = timeFormat.parse(course.startTime)
+                        val existingEndTime = timeFormat.parse(course.endTime)
+
+                        // 检查是否有时间冲突
+                        if (newStartTime != null && newEndTime != null && existingStartTime != null && existingEndTime != null) {
+                            if (newStartTime.before(existingEndTime) && newEndTime.after(
+                                    existingStartTime
+                                )
+                            ) {
+                                hasConflict = true
+                                break
+                            }
+                        }
+                    }
+
+                    if (hasConflict) break
+                }
+
+                // 如果有冲突，提示用户并阻止添加
+                if (hasConflict) {
                     runOnUiThread {
                         Toast.makeText(
                             this@CourseActivity,
-                            "Course updated successfully",
+                            "Time conflict with an existing course",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
                 } else {
-                    val courseEntity = CourseEntity(
-                        weekday = weekdays,
-                        startTime = startTime,
-                        endTime = endTime,
-                        name = courseName,
-                        location = location,
-                        description = description,
-                        color = selectedColor
-                    )
-                    courseDao.insert(courseEntity)
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@CourseActivity,
-                            "Course added successfully",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    // 编辑课程时，覆盖已有课程
+                    if (courseId != -1) {
+                        courseDao.updateCourse(
+                            courseId,
+                            weekdays,
+                            startTime,
+                            endTime,
+                            courseName,
+                            location,
+                            description,
+                            selectedColor
+                        )
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@CourseActivity,
+                                "Course updated successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    } else {
+                        val courseEntity = CourseEntity(
+                            weekday = weekdays,
+                            startTime = startTime,
+                            endTime = endTime,
+                            name = courseName,
+                            location = location,
+                            description = description,
+                            color = selectedColor
+                        )
+                        courseDao.insert(courseEntity)
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@CourseActivity,
+                                "Course added successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
+                    val intent = Intent(this@CourseActivity, HomepageActivity::class.java)
+                    startActivity(intent)
                 }
-                val intent = Intent(this@CourseActivity, HomepageActivity::class.java)
-                startActivity(intent)
             }
         }
+
 
         buttonBack.setOnClickListener {
             val intent = Intent(this, HomepageActivity::class.java)

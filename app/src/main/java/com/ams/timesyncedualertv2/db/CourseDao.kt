@@ -8,6 +8,9 @@ interface CourseDao {
     @Insert
     suspend fun insert(course: CourseEntity)
 
+    @Insert
+    suspend fun insertAll(courses: List<CourseEntity>)
+
     @Query("SELECT * FROM courses WHERE weekday LIKE '%' || :weekday || '%'")
     suspend fun getCoursesForWeekday(weekday: Int): List<CourseEntity>
 
@@ -19,6 +22,9 @@ interface CourseDao {
 
     @Query("SELECT * FROM courses WHERE id = :courseId LIMIT 1")
     suspend fun getCourseById(courseId: Int): CourseEntity?
+
+    @Query("SELECT * FROM courses")
+    suspend fun getAllCourses(): List<CourseEntity>
 
     @Query(
         """
