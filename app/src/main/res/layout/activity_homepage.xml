@@ -15,6 +15,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <Button
+            android:layout_marginHorizontal="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/settings_button"
@@ -26,6 +27,7 @@
             android:layout_weight="1" />
 
         <Button
+            android:layout_marginHorizontal="16dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/add_course_button"
