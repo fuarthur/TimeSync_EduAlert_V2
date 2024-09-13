@@ -20,10 +20,11 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class AddCourseActivity : AppCompatActivity() {
+class CourseActivity : AppCompatActivity() {
     private var startTime: String = ""
     private var endTime: String = ""
     private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+    private var courseId: Int = -1
 
     private val checkboxMonday by lazy { findViewById<CheckBox>(R.id.checkbox_monday) }
     private val checkboxTuesday by lazy { findViewById<CheckBox>(R.id.checkbox_tuesday) }
@@ -46,20 +47,37 @@ class AddCourseActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_course)
 
-        buttonSelectStartTime.setOnClickListener {
-            showTimePickerDialog { selectedTime ->
-                if (endTime.isBlank() || isEndTimeValid(selectedTime, endTime)) {
-                    startTime = selectedTime
-                    buttonSelectStartTime.text = startTime
-                } else {
-                    Toast.makeText(
-                        this,
-                        "Start time must be earlier than end time",
-                        Toast.LENGTH_SHORT
-                    ).show()
+        val db = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java, "courses.db"
+        ).build()
+        val courseDao = db.courseDao()
+
+        courseId = intent.getIntExtra("course_id", -1)
+
+        if (courseId != -1) {
+            // 编辑课程，预填充课程信息
+            lifecycleScope.launch {
+                val course = courseDao.getCourseById(courseId)
+                course?.let {
+                    runOnUiThread {
+                        fillCourseDetails(it)
+                    }
                 }
             }
         }
+
+        buttonSelectStartTime.setOnClickListener {
+            showTimePickerDialog { selectedTime ->
+                startTime = selectedTime
+                buttonSelectStartTime.text = startTime
+                if (endTime.isBlank() || !isEndTimeValid(startTime, endTime)) {
+                    endTime = startTime
+                    buttonSelectEndTime.text = endTime
+                }
+            }
+        }
+
 
         buttonSelectEndTime.setOnClickListener {
             showTimePickerDialog { selectedTime ->
@@ -81,13 +99,6 @@ class AddCourseActivity : AppCompatActivity() {
             openColorPickerDialog()
         }
 
-        val db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "courses.db"
-        ).build()
-
-        val courseDao = db.courseDao()
-
         buttonSubmit.setOnClickListener {
             val weekdays = getSelectedWeekdays()
             val courseName = editTextCourseName.text.toString()
@@ -98,48 +109,27 @@ class AddCourseActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // 将 startTime 和 endTime 转换为时间对象
-            val newStartTime = timeFormat.parse(startTime)
-            val newEndTime = timeFormat.parse(endTime)
-
-            // 在协程中查询是否有时间冲突
             lifecycleScope.launch {
-                var hasConflict = false
-
-                for (weekday in weekdays) {
-                    // 获取当天的所有课程
-                    val existingCourses = courseDao.getCoursesForWeekday(weekday)
-
-                    for (course in existingCourses) {
-                        val existingStartTime = timeFormat.parse(course.startTime)
-                        val existingEndTime = timeFormat.parse(course.endTime)
-
-                        // 检查是否有时间冲突
-                        if (newStartTime != null && newEndTime != null && existingStartTime != null && existingEndTime != null) {
-                            if (newStartTime.before(existingEndTime) && newEndTime.after(
-                                    existingStartTime
-                                )
-                            ) {
-                                hasConflict = true
-                                break
-                            }
-                        }
-                    }
-
-                    if (hasConflict) break
-                }
-
-                // 如果有冲突，提示用户并阻止添加
-                if (hasConflict) {
+                // 编辑课程时，覆盖已有课程
+                if (courseId != -1) {
+                    courseDao.updateCourse(
+                        courseId,
+                        weekdays,
+                        startTime,
+                        endTime,
+                        courseName,
+                        location,
+                        description,
+                        selectedColor
+                    )
                     runOnUiThread {
                         Toast.makeText(
-                            this@AddCourseActivity,
-                            "Time conflict with an existing course",
+                            this@CourseActivity,
+                            "Course updated successfully",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
                 } else {
-                    // 否则，插入新课程
                     val courseEntity = CourseEntity(
                         weekday = weekdays,
                         startTime = startTime,
@@ -149,25 +139,45 @@ class AddCourseActivity : AppCompatActivity() {
                         description = description,
                         color = selectedColor
                     )
-
                     courseDao.insert(courseEntity)
                     runOnUiThread {
                         Toast.makeText(
-                            this@AddCourseActivity,
+                            this@CourseActivity,
                             "Course added successfully",
                             Toast.LENGTH_SHORT
                         ).show()
-                        val intent = Intent(this@AddCourseActivity, HomepageActivity::class.java)
-                        startActivity(intent)
                     }
                 }
+                val intent = Intent(this@CourseActivity, HomepageActivity::class.java)
+                startActivity(intent)
             }
         }
-
 
         buttonBack.setOnClickListener {
             val intent = Intent(this, HomepageActivity::class.java)
             startActivity(intent)
+        }
+    }
+
+    private fun fillCourseDetails(course: CourseEntity) {
+        editTextCourseName.setText(course.name)
+        editTextLocation.setText(course.location)
+        buttonSelectStartTime.text = course.startTime
+        buttonSelectEndTime.text = course.endTime
+        editTextDescription.setText(course.description)
+        selectedColor = course.color
+        buttonSelectColor.setBackgroundColor(selectedColor)
+        startTime = course.startTime
+        endTime = course.endTime
+
+        course.weekday.forEach {
+            when (it) {
+                1 -> checkboxMonday.isChecked = true
+                2 -> checkboxTuesday.isChecked = true
+                3 -> checkboxWednesday.isChecked = true
+                4 -> checkboxThursday.isChecked = true
+                5 -> checkboxFriday.isChecked = true
+            }
         }
     }
 

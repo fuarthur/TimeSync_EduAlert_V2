@@ -41,7 +41,7 @@ class HomepageActivity : AppCompatActivity() {
         }
 
         addCourseButton.setOnClickListener {
-            val intent = Intent(this, AddCourseActivity::class.java)
+            val intent = Intent(this, CourseDetailsActivity::class.java)
             startActivity(intent)
         }
     }

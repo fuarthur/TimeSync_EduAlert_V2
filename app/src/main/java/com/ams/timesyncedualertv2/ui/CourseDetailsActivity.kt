@@ -52,7 +52,15 @@ class CourseDetailsActivity : AppCompatActivity() {
 
         // 编辑课程点击事件
         buttonEditCourse.setOnClickListener {
-            // TODO: 打开编辑页面，传递数据
+            val intent = Intent(this, CourseActivity::class.java).apply {
+                putExtra("course_id", courseId)
+                putExtra("course_name", courseName)
+                putExtra("course_location", courseLocation)
+                putExtra("course_start_time", courseStartTime)
+                putExtra("course_end_time", courseEndTime)
+                putExtra("course_description", courseDescription)
+            }
+            startActivity(intent)
         }
 
         // 删除课程点击事件
