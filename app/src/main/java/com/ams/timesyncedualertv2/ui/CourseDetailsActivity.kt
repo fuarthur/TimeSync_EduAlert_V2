@@ -46,6 +46,10 @@ class CourseDetailsActivity : AppCompatActivity() {
         ).build()
         val courseDao = db.courseDao()
 
+        buttonBack.setOnClickListener {
+            finish()
+        }
+
         // 编辑课程点击事件
         buttonEditCourse.setOnClickListener {
             // TODO: 打开编辑页面，传递数据
