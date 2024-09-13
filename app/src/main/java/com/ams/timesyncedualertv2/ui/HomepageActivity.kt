@@ -3,16 +3,11 @@ package com.ams.timesyncedualertv2.ui
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import androidx.room.Room
 import androidx.viewpager2.widget.ViewPager2
 import com.ams.timesyncedualertv2.R
-import com.ams.timesyncedualertv2.db.AppDatabase
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import kotlinx.coroutines.launch
 
 class HomepageActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager2

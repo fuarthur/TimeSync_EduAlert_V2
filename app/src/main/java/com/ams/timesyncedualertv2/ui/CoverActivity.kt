@@ -17,6 +17,14 @@ class CoverActivity: AppCompatActivity() {
         }, resources.getInteger(R.integer.cover_delay_milis).toLong())
     }
 
+    override fun onResume() {
+        super.onResume()
+        Handler(Looper.myLooper()!!).postDelayed({
+            startHomepageActivity()
+        }, resources.getInteger(R.integer.cover_delay_milis).toLong())
+    }
+
+
     private fun startHomepageActivity() {
         val intent = Intent(this, HomepageActivity::class.java)
         startActivity(intent)
