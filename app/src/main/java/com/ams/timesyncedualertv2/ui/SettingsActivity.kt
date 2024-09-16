@@ -79,7 +79,7 @@ class SettingsActivity : AppCompatActivity() {
 
         // 设置导出按钮点击事件
         buttonExportSchedule.setOnClickListener {
-            openFilePickerForExport(courseDao)
+            openFilePickerForExport()
         }
 
         buttonDeleteAllCourses.setOnClickListener {
@@ -120,7 +120,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     // 使用 SAF 打开文件选择器进行导出
-    private fun openFilePickerForExport(courseDao: CourseDao) {
+    private fun openFilePickerForExport() {
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "application/json"
