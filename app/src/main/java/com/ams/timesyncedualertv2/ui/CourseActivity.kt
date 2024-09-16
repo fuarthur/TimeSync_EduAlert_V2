@@ -121,6 +121,11 @@ class CourseActivity : AppCompatActivity() {
                     val existingCourses = courseDao.getCoursesForWeekday(weekday)
 
                     for (course in existingCourses) {
+                        // 跳过当前正在编辑的课程
+                        if (course.id == courseId) {
+                            continue
+                        }
+
                         val existingStartTime = timeFormat.parse(course.startTime)
                         val existingEndTime = timeFormat.parse(course.endTime)
 
@@ -192,6 +197,7 @@ class CourseActivity : AppCompatActivity() {
                 }
             }
         }
+
 
 
         buttonBack.setOnClickListener {
