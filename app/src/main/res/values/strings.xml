@@ -27,4 +27,8 @@
     <string name="course_time_format">%1$s - %2$s</string>
     <string name="hint_delete">Delete</string>
     <string name="hint_edit">Edit</string>
+    <string name="hint_clear_all_schedules">Clear All Schedules</string>
+    <string name="hint_enable_notifications">Enable Notifications</string>
+    <string name="hint_export_schedule">Export Schedule</string>
+    <string name="hint_import_schedule">Import Schedule</string>
 </resources>
