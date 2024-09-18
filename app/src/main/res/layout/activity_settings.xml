@@ -7,13 +7,33 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <Button
-        android:id="@+id/button_back"
-        android:layout_width="wrap_content"
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="start"
-        android:layout_marginVertical="16dp"
-        android:text="@string/hint_back" />
+        android:layout_marginVertical="12dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button_back"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/hint_back"
+            android:textSize="16sp"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/button_submit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/hint_submit"
+            android:textSize="16sp"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
 
     <!-- Enable Notifications Switch (Purple CardView) -->
     <androidx.cardview.widget.CardView
@@ -46,6 +66,45 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end" />
         </LinearLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/purple_500"
+        android:elevation="4dp"
+        android:padding="16dp"
+        app:cardCornerRadius="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16sp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textColor="@color/white"
+        android:text="@string/hint_remind_me_before" />
+
+    <EditText
+        android:id="@+id/edittext_time_before"
+        android:layout_width="match_parent"
+        android:layout_marginHorizontal="10dp"
+        android:layout_height="50dp"
+        android:autofillHints="Course Name"
+        android:textColorHint="@color/white"
+        android:hint="@string/hint_minute_s"
+        android:inputType="text" />
+
+        </LinearLayout>
+
     </androidx.cardview.widget.CardView>
 
     <!-- Import Schedule Button (Purple Button) -->

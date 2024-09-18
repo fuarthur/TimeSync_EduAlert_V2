@@ -29,6 +29,8 @@ class SettingsActivity : AppCompatActivity() {
     private val buttonImportSchedule: Button by lazy { findViewById(R.id.button_import_schedule) }
     private val buttonExportSchedule: Button by lazy { findViewById(R.id.button_export_schedule) }
     private val buttonDeleteAllCourses: Button by lazy { findViewById(R.id.button_clear_all_schedules) }
+    private val edittextTimeBefore: Button by lazy { findViewById(R.id.edittext_time_before) }
+    private val buttonSubmit: Button by lazy { findViewById(R.id.button_submit) }
     private lateinit var courseDao: CourseDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +64,39 @@ class SettingsActivity : AppCompatActivity() {
             }
             editor.apply()
         }
+
+        buttonSubmit.setOnClickListener {
+            val timeBefore = edittextTimeBefore.text.toString()
+            // Check if the input is a valid number between 1 and 1440 (minutes)
+            if (timeBefore.matches(Regex("\\d+")) && timeBefore.toInt() in 1..1440) {
+                val reminderTime = timeBefore.toInt()
+
+                // Save the new reminder time in SharedPreferences
+                editor.putInt("reminder_time", reminderTime)
+                editor.apply()
+
+                Toast.makeText(
+                    this,
+                    "Reminder time updated to $reminderTime minutes before",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                // Cancel all existing course reminders
+                NotificationUtils.cancelCourseReminders(this)
+
+                // Re-enable course reminders with the updated time
+                NotificationUtils.enableCourseReminders(this, lifecycleScope)
+
+            } else {
+                // Show a message if the input is invalid
+                Toast.makeText(
+                    this,
+                    "Invalid time. Please enter a number between 1 and 1440 minutes.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
 
 
         buttonBack.setOnClickListener {

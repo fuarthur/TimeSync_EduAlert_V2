@@ -31,4 +31,6 @@
     <string name="hint_enable_notifications">Enable Notifications</string>
     <string name="hint_export_schedule">Export Schedule</string>
     <string name="hint_import_schedule">Import Schedule</string>
+    <string name="hint_remind_me_before">Remind Me Before:</string>
+    <string name="hint_minute_s">minute(s)</string>
 </resources>
