@@ -5,11 +5,11 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
-import android.widget.Switch
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import com.ams.timesyncedualertv2.R
@@ -23,7 +23,7 @@ import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 
 class SettingsActivity : AppCompatActivity() {
-    private val switchEnableNotifications: Switch by lazy { findViewById(R.id.switch_enable_notifications) }
+    private val switchEnableNotifications: SwitchCompat by lazy { findViewById(R.id.switch_enable_notifications) }
     private val buttonBack: Button by lazy { findViewById(R.id.button_back) }
     private val buttonImportSchedule: Button by lazy { findViewById(R.id.button_import_schedule) }
     private val buttonExportSchedule: Button by lazy { findViewById(R.id.button_export_schedule) }
@@ -41,7 +41,25 @@ class SettingsActivity : AppCompatActivity() {
         ).build()
         courseDao = db.courseDao()
 
-        // TODO: 设置开关状态，并监听状态变化（保存用户设置）
+        val sharedPreferences = getSharedPreferences("user_settings", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+
+        val notificationsEnabled = sharedPreferences.getBoolean("enable_notifications", true)
+
+        switchEnableNotifications.isChecked = notificationsEnabled
+
+        switchEnableNotifications.setOnCheckedChangeListener { _, isChecked ->
+            editor.putBoolean("enable_notifications", isChecked)
+            editor.apply()
+            // TODO: 确认后添加所有课程的提醒，取消之后删除所有提醒（另外在添加/修改/删除课程之后也应该更新提醒）
+            if (isChecked) {
+                editor.putBoolean("enable_notifications", true)
+            } else {
+                editor.putBoolean("enable_notifications", false)
+            }
+            editor.apply()
+        }
+
 
         buttonBack.setOnClickListener {
             intent = Intent(this, HomepageActivity::class.java)
@@ -165,7 +183,8 @@ class SettingsActivity : AppCompatActivity() {
 
                     // 将 JSON 数据转换为 CourseEntity 对象
                     val gson = Gson()
-                    val importedCourses = gson.fromJson(json, Array<CourseEntity>::class.java).toList()
+                    val importedCourses =
+                        gson.fromJson(json, Array<CourseEntity>::class.java).toList()
 
                     // 插入到数据库中
                     val db = Room.databaseBuilder(
@@ -176,14 +195,22 @@ class SettingsActivity : AppCompatActivity() {
                     courseDao.insertAll(importedCourses)
 
                     runOnUiThread {
-                        Toast.makeText(this@SettingsActivity, "Courses imported successfully.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@SettingsActivity,
+                            "Courses imported successfully.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             } catch (e: Exception) {
                 Log.d("User-debug", e.message.toString())
                 e.printStackTrace()
                 runOnUiThread {
-                    Toast.makeText(this@SettingsActivity, "Failed to import courses.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@SettingsActivity,
+                        "Failed to import courses.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -212,18 +239,30 @@ class SettingsActivity : AppCompatActivity() {
                         writer.close()
 
                         runOnUiThread {
-                            Toast.makeText(this@SettingsActivity, "Courses exported successfully.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@SettingsActivity,
+                                "Courses exported successfully.",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     runOnUiThread {
-                        Toast.makeText(this@SettingsActivity, "Failed to export courses.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@SettingsActivity,
+                            "Failed to export courses.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             } else {
                 runOnUiThread {
-                    Toast.makeText(this@SettingsActivity, "No courses to export.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@SettingsActivity,
+                        "No courses to export.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
