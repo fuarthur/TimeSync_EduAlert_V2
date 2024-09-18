@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import com.ams.timesyncedualertv2.db.AppDatabase
 import com.ams.timesyncedualertv2.model.CourseEntity
+import com.ams.timesyncedualertv2.util.NotificationUtils
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -192,6 +193,9 @@ class CourseActivity : AppCompatActivity() {
                             ).show()
                         }
                     }
+
+                    NotificationUtils.refreshReminders(this@CourseActivity, lifecycleScope)
+
                     val intent = Intent(this@CourseActivity, HomepageActivity::class.java)
                     startActivity(intent)
                 }

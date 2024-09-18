@@ -16,6 +16,7 @@ import com.ams.timesyncedualertv2.R
 import com.ams.timesyncedualertv2.db.AppDatabase
 import com.ams.timesyncedualertv2.db.CourseDao
 import com.ams.timesyncedualertv2.model.CourseEntity
+import com.ams.timesyncedualertv2.util.NotificationUtils
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
@@ -51,11 +52,13 @@ class SettingsActivity : AppCompatActivity() {
         switchEnableNotifications.setOnCheckedChangeListener { _, isChecked ->
             editor.putBoolean("enable_notifications", isChecked)
             editor.apply()
-            // TODO: 确认后添加所有课程的提醒，取消之后删除所有提醒（另外在添加/修改/删除课程之后也应该更新提醒）
             if (isChecked) {
                 editor.putBoolean("enable_notifications", true)
+                NotificationUtils.enableCourseReminders(this, lifecycleScope)
             } else {
                 editor.putBoolean("enable_notifications", false)
+                NotificationUtils.cancelCourseReminders(this)
+
             }
             editor.apply()
         }

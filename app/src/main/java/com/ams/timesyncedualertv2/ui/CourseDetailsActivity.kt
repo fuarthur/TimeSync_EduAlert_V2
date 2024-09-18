@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import com.ams.timesyncedualertv2.R
 import com.ams.timesyncedualertv2.db.AppDatabase
+import com.ams.timesyncedualertv2.util.NotificationUtils
 import kotlinx.coroutines.launch
 
 class CourseDetailsActivity : AppCompatActivity() {
@@ -68,7 +69,9 @@ class CourseDetailsActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 val course = courseDao.getCourseById(courseId)
                 if (course != null) {
+                    NotificationUtils.cancelNotificationForCourse(this@CourseDetailsActivity, course)
                     courseDao.delete(course)
+                    NotificationUtils.refreshReminders(this@CourseDetailsActivity, lifecycleScope)
                     runOnUiThread {
                         Toast.makeText(this@CourseDetailsActivity, "Course deleted successfully", Toast.LENGTH_SHORT).show()
                         val intent = Intent(this@CourseDetailsActivity, HomepageActivity::class.java)
