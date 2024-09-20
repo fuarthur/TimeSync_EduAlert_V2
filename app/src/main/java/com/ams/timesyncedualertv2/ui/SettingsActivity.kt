@@ -5,17 +5,19 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
-import android.widget.Switch
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
 import com.ams.timesyncedualertv2.R
 import com.ams.timesyncedualertv2.db.AppDatabase
 import com.ams.timesyncedualertv2.db.CourseDao
 import com.ams.timesyncedualertv2.model.CourseEntity
+import com.ams.timesyncedualertv2.util.NotificationUtils
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
@@ -23,11 +25,13 @@ import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 
 class SettingsActivity : AppCompatActivity() {
-    private val switchEnableNotifications: Switch by lazy { findViewById(R.id.switch_enable_notifications) }
+    private val switchEnableNotifications: SwitchCompat by lazy { findViewById(R.id.switch_enable_notifications) }
     private val buttonBack: Button by lazy { findViewById(R.id.button_back) }
     private val buttonImportSchedule: Button by lazy { findViewById(R.id.button_import_schedule) }
     private val buttonExportSchedule: Button by lazy { findViewById(R.id.button_export_schedule) }
     private val buttonDeleteAllCourses: Button by lazy { findViewById(R.id.button_clear_all_schedules) }
+    private val edittextTimeBefore: EditText by lazy { findViewById(R.id.edittext_time_before) }
+    private val buttonSubmit: Button by lazy { findViewById(R.id.button_submit) }
     private lateinit var courseDao: CourseDao
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +45,62 @@ class SettingsActivity : AppCompatActivity() {
         ).build()
         courseDao = db.courseDao()
 
-        // TODO: 设置开关状态，并监听状态变化（保存用户设置）
+        val sharedPreferences = getSharedPreferences("user_settings", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+
+        val notificationsEnabled = sharedPreferences.getBoolean("enable_notifications", true)
+
+        switchEnableNotifications.isChecked = notificationsEnabled
+
+        switchEnableNotifications.setOnCheckedChangeListener { _, isChecked ->
+            editor.putBoolean("enable_notifications", isChecked)
+            editor.apply()
+            if (isChecked) {
+                editor.putBoolean("enable_notifications", true)
+                NotificationUtils.enableCourseReminders(this, lifecycleScope)
+            } else {
+                editor.putBoolean("enable_notifications", false)
+                NotificationUtils.cancelCourseReminders(this)
+
+            }
+            editor.apply()
+        }
+
+        edittextTimeBefore.hint =
+            getString(R.string.reminder_time_text, sharedPreferences.getInt("reminder_time", 10))
+        buttonSubmit.setOnClickListener {
+            val timeBefore = edittextTimeBefore.text.toString()
+            // Check if the input is a valid number between 1 and 1440 (minutes)
+            if (timeBefore.matches(Regex("\\d+")) && timeBefore.toInt() in 1..1440) {
+                val reminderTime = timeBefore.toInt()
+
+                // Save the new reminder time in SharedPreferences
+                editor.putInt("reminder_time", reminderTime)
+                editor.apply()
+
+                Toast.makeText(
+                    this,
+                    "Reminder time updated to $reminderTime minutes before",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                // Cancel all existing course reminders
+                NotificationUtils.cancelCourseReminders(this)
+
+                // Re-enable course reminders with the updated time
+                NotificationUtils.enableCourseReminders(this, lifecycleScope)
+
+            } else {
+                // Show a message if the input is invalid
+                Toast.makeText(
+                    this,
+                    "Invalid time. Please enter a number between 1 and 1440 minutes.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+
 
         buttonBack.setOnClickListener {
             intent = Intent(this, HomepageActivity::class.java)
@@ -165,7 +224,8 @@ class SettingsActivity : AppCompatActivity() {
 
                     // 将 JSON 数据转换为 CourseEntity 对象
                     val gson = Gson()
-                    val importedCourses = gson.fromJson(json, Array<CourseEntity>::class.java).toList()
+                    val importedCourses =
+                        gson.fromJson(json, Array<CourseEntity>::class.java).toList()
 
                     // 插入到数据库中
                     val db = Room.databaseBuilder(
@@ -176,14 +236,22 @@ class SettingsActivity : AppCompatActivity() {
                     courseDao.insertAll(importedCourses)
 
                     runOnUiThread {
-                        Toast.makeText(this@SettingsActivity, "Courses imported successfully.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@SettingsActivity,
+                            "Courses imported successfully.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             } catch (e: Exception) {
                 Log.d("User-debug", e.message.toString())
                 e.printStackTrace()
                 runOnUiThread {
-                    Toast.makeText(this@SettingsActivity, "Failed to import courses.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@SettingsActivity,
+                        "Failed to import courses.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -212,18 +280,30 @@ class SettingsActivity : AppCompatActivity() {
                         writer.close()
 
                         runOnUiThread {
-                            Toast.makeText(this@SettingsActivity, "Courses exported successfully.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@SettingsActivity,
+                                "Courses exported successfully.",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     runOnUiThread {
-                        Toast.makeText(this@SettingsActivity, "Failed to export courses.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@SettingsActivity,
+                            "Failed to export courses.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             } else {
                 runOnUiThread {
-                    Toast.makeText(this@SettingsActivity, "No courses to export.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@SettingsActivity,
+                        "No courses to export.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
