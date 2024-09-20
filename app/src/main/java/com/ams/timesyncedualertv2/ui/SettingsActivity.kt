@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -29,7 +30,7 @@ class SettingsActivity : AppCompatActivity() {
     private val buttonImportSchedule: Button by lazy { findViewById(R.id.button_import_schedule) }
     private val buttonExportSchedule: Button by lazy { findViewById(R.id.button_export_schedule) }
     private val buttonDeleteAllCourses: Button by lazy { findViewById(R.id.button_clear_all_schedules) }
-    private val edittextTimeBefore: Button by lazy { findViewById(R.id.edittext_time_before) }
+    private val edittextTimeBefore: EditText by lazy { findViewById(R.id.edittext_time_before) }
     private val buttonSubmit: Button by lazy { findViewById(R.id.button_submit) }
     private lateinit var courseDao: CourseDao
 
@@ -65,6 +66,8 @@ class SettingsActivity : AppCompatActivity() {
             editor.apply()
         }
 
+        edittextTimeBefore.hint =
+            getString(R.string.reminder_time_text, sharedPreferences.getInt("reminder_time", 10))
         buttonSubmit.setOnClickListener {
             val timeBefore = edittextTimeBefore.text.toString()
             // Check if the input is a valid number between 1 and 1440 (minutes)

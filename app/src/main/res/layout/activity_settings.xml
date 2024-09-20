@@ -101,6 +101,7 @@
         android:autofillHints="Course Name"
         android:textColorHint="@color/white"
         android:hint="@string/hint_minute_s"
+        android:textColor="@color/white"
         android:inputType="text" />
 
         </LinearLayout>
