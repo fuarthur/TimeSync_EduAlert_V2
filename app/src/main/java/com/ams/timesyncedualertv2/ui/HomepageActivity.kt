@@ -60,7 +60,6 @@ class HomepageActivity : AppCompatActivity() {
         }
 
         checkNotificationPermission()
-        NotificationUtils.testNotification(this)
     }
 
     private fun switchToCurrentDayTab() {
@@ -80,6 +79,7 @@ class HomepageActivity : AppCompatActivity() {
     }
 
     private fun checkNotificationPermission() {
+        NotificationUtils.createNotificationChannel(this)
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestNotificationPermission()
         } else {

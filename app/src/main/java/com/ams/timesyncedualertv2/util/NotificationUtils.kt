@@ -1,5 +1,6 @@
 package com.ams.timesyncedualertv2.util
 
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
@@ -15,6 +16,19 @@ import java.util.Calendar
 import java.util.Locale
 
 object NotificationUtils {
+
+    fun createNotificationChannel(context: Context) {
+        val name = "TimeSync_EduAlert"
+        val descriptionText = "This is a channel for test notifications"
+        val importance = NotificationManager.IMPORTANCE_HIGH
+        val channel = NotificationChannel("timesync_edualert", name, importance).apply {
+            description = descriptionText
+        }
+        val notificationManager: NotificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
+
 
     // Function to enable course reminders based on reminder_time in preferences
     fun enableCourseReminders(context: Context, lifecycleScope: CoroutineScope) {
@@ -96,7 +110,7 @@ object NotificationUtils {
     private fun showCourseReminder(context: Context, course: CourseEntity) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val notification = NotificationCompat.Builder(context, "course_reminder_channel")
+        val notification = NotificationCompat.Builder(context, "timesync_edualert")
             .setSmallIcon(R.drawable.icon) // Replace with actual notification icon
             .setContentTitle("Upcoming Course: ${course.name}")
             .setContentText("Starts at ${course.startTime}. Location: ${course.location}")
@@ -114,9 +128,9 @@ object NotificationUtils {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         // Use NotificationCompat.Builder to build and trigger the notification at the calculated time
-        val notification = NotificationCompat.Builder(context, "course_reminder_channel")
+        val notification = NotificationCompat.Builder(context, "timesync_edualert")
             .setSmallIcon(R.drawable.icon)
-            .setContentTitle("Next Week Course: ${course.name}")
+            .setContentTitle("Next Course: ${course.name}")
             .setContentText("Starts at ${course.startTime}. Location: ${course.location}")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
@@ -142,20 +156,5 @@ object NotificationUtils {
             5 -> Calendar.FRIDAY
             else -> Calendar.SUNDAY // Default to Sunday if invalid
         }
-    }
-
-    // test notification
-    fun testNotification(context: Context) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        val notification = NotificationCompat.Builder(context, "test_channel")
-            .setSmallIcon(R.drawable.icon)
-            .setContentTitle("Test Notification")
-            .setContentText("This is a test notification, if you see this, it means this is a test version of the app.")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true)
-            .build()
-
-        notificationManager.notify(0, notification)
     }
 }
