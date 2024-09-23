@@ -143,4 +143,19 @@ object NotificationUtils {
             else -> Calendar.SUNDAY // Default to Sunday if invalid
         }
     }
+
+    // test notification
+    fun testNotification(context: Context) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val notification = NotificationCompat.Builder(context, "test_channel")
+            .setSmallIcon(R.drawable.icon)
+            .setContentTitle("Test Notification")
+            .setContentText("This is a test notification, if you see this, it means this is a test version of the app.")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(0, notification)
+    }
 }
