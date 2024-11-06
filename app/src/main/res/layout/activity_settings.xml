@@ -29,7 +29,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/hint_submit"
+            android:text="@string/hint_update"
             android:textSize="16sp"
             android:layout_marginStart="8dp" />
 
