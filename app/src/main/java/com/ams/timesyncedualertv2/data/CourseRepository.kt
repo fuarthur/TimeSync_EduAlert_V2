@@ -26,7 +26,7 @@ class CourseRepository(private val db:AppDatabase) {
     }
 
     suspend fun replace(courses:List<CourseEntity>) {
-        val valid=courses.map(CourseRules::validate)
+        val valid=CourseRules.validateSchedule(courses)
         require(valid.size<=1000) { "Too many courses" }
         val ids=valid.map { it.id }.filter { it!=0 }
         require(ids.distinct().size==ids.size) { "Duplicate course IDs" }

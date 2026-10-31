@@ -11,4 +11,9 @@ class BackupCodecTest {
     @Test fun rejectsOutOfRangeDay() { assertThrows(IllegalArgumentException::class.java) { BackupCodec.decode(json("[8]")) } }
     @Test fun rejectsNullAndMissingFields() { for (value in listOf("null", "[null]", "[{}]")) assertThrows(IllegalArgumentException::class.java) { BackupCodec.decode(value) } }
     @Test fun rejectsDuplicateIds() { val one=json().removePrefix("[").removeSuffix("]"); assertThrows(IllegalArgumentException::class.java) { BackupCodec.decode("[$one,$one]") } }
+    @Test fun overlappingCoursesAreRejectedBeforePreview() {
+        val one=json().removePrefix("[").removeSuffix("]")
+        val second=one.replace("\"id\":1","\"id\":2")
+        assertThrows(IllegalArgumentException::class.java) { BackupCodec.decode("[$one,$second]") }
+    }
 }

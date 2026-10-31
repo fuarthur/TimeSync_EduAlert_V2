@@ -21,6 +21,17 @@ object CourseRules {
         return course.copy(weekday=course.weekday.sorted(), name=course.name.trim(), location=course.location.trim(), description=course.description.trim())
     }
 
+    fun validateSchedule(courses:List<CourseEntity>):List<CourseEntity> {
+        val valid=courses.map(::validate)
+        for(day in 1..7) {
+            val ordered=valid.filter { day in it.weekday }.sortedBy { it.startTime }
+            ordered.zipWithNext().forEach { (first,second) ->
+                require(first.endTime<=second.startTime) { "Overlapping courses: ${first.name} and ${second.name}" }
+            }
+        }
+        return valid
+    }
+
     fun overlaps(first: CourseEntity, second: CourseEntity): Boolean =
         first.weekday.any { it in second.weekday } &&
             time(first.startTime) < time(second.endTime) && time(first.endTime) > time(second.startTime)

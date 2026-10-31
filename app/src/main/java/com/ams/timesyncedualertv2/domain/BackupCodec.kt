@@ -41,7 +41,7 @@ object BackupCodec {
             }
             val ids=courses.map { it.id }.filter { it != 0 }
             require(ids.distinct().size == ids.size) { "Duplicate course IDs" }
-            return courses
+            return CourseRules.validateSchedule(courses)
         } catch (e: Exception) {
             throw IllegalArgumentException(e.message ?: "Invalid timetable backup", e)
         }

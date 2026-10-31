@@ -46,4 +46,13 @@ class CourseRepositoryTest {
             assertTrue(repo.all().all { it.id>0 })
         } finally { db.close() }
     }
+    @Test fun overlappingReplacementRetainsExistingTimetable()=runBlocking {
+        val db=Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(),AppDatabase::class.java).build()
+        try {
+            val repo=CourseRepository(db); val id=repo.save(course())
+            assertTrue(repo.runCatching { replace(listOf(course("11:00","12:00"),course("11:30","12:30"))) }.isFailure)
+            assertEquals(listOf(id),repo.all().map { it.id })
+            assertEquals("09:00",repo.all().single().startTime)
+        } finally { db.close() }
+    }
 }
