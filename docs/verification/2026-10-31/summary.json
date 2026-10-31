@@ -1,0 +1,41 @@
+{
+  "source_commit": "4a5ca96",
+  "local_tests": {
+    "tests": 41,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "lint": {
+    "debug": {
+      "errors": 0,
+      "warnings": 0
+    },
+    "release": {
+      "errors": 0,
+      "warnings": 0
+    }
+  },
+  "clean_build": {
+    "jdk": 17,
+    "sdk": "37.0",
+    "executed_tasks": 102,
+    "debug": "passed",
+    "release": "passed"
+  },
+  "apk_sha256": "c17b553b1f1b02e10196f583a75e47db469d5c118767361d3bbe8d49c2ea0343",
+  "device_tests": {
+    "33": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "37": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  }
+}

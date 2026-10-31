@@ -28,11 +28,13 @@
 
 ## 构建与检查
 
-需要 Android SDK 34，建议使用 JDK 17。设置 `ANDROID_HOME`，或由 Android Studio 生成指向 SDK 的 `local.properties`。Gradle 启动文件和依赖版本目录均已提交。
+需要 Android SDK 37.0、Build Tools 36.0.0 和 JDK 17。可使用兼容 AGP 9.5 的 Android Studio，或直接通过 Gradle 构建。设置 `ANDROID_HOME`，或由 Android Studio 生成指向 SDK 的 `local.properties`。Gradle 启动文件和依赖版本目录均已提交。
 
 ```sh
-./gradlew testDebugUnitTest assembleDebug lintDebug
+./gradlew testDebugUnitTest assembleDebug assembleRelease lintDebug lintRelease
 ```
+
+命令分别检查 Debug 和 Release；出现 Lint 警告会令检查失败。
 
 连接测试模拟器后运行完整操作流程测试：
 
@@ -45,6 +47,8 @@
 技术栈为 Kotlin、Android Views/Material、Room、协程和 Gson。无需账号、云端服务或网络权限。
 
 ## 维护记录
+
+- [Lint 清理、依赖版本与验证记录](docs/LINT_CLEANUP.md)
 
 - [问题与提交对应表](docs/CHANGES.md)
 - [实际验证结果与截图](docs/VERIFICATION.md)

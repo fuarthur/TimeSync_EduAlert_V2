@@ -29,3 +29,5 @@ Layout regression: the long-location landscape test failed with a collapsed page
 Minor date follow-up: the toolbar date is refreshed on resume/periodic render and only assigned when changed. No important findings remain unaddressed.
 
 Final verification at code commit 3f0fca3: 39 local tests and 7 native tests passed, Debug APK built, Lint reported 0 errors / 112 warnings. A fresh tracked-only archive on JDK 17 passed all 53 build/test/lint tasks. Manual captures cover light/dark, English/Chinese, font scale 1.3 and a wide screen. The final accessibility and selected-weekday fixes are separately committed. See VERIFICATION.md and CHANGES.md.
+
+2026-10-31 follow-up: all 112 remaining Lint warnings were resolved; both variants now report 0 issues. The original database remains compatible after the toolchain update. Updated verification and issue commits are recorded in LINT_CLEANUP.md.

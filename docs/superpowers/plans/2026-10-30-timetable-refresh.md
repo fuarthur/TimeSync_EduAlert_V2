@@ -39,3 +39,6 @@
 
 ## Progress
 Execution notes and test evidence are recorded in docs/IMPLEMENTATION.md. All issue fixes remain independently identifiable even when later refactors replace their implementation.
+
+## 2026-10-31 Lint follow-up
+The user subsequently authorized clearing all remaining Lint warnings. This follow-up updates compile/target SDK to 37 while retaining minSdk 33, the application ID and Room version 1. All warning fixes, updated toolchain checks and API 33/37 verification are recorded in docs/LINT_CLEANUP.md.

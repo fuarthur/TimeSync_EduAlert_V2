@@ -1,5 +1,7 @@
 # 本轮修改与提交对应表
 
+2026-10-31 后续的 112 条 Lint 警告清理及逐项提交见 [LINT_CLEANUP.md](LINT_CLEANUP.md)。
+
 起点：`73374cd`。工作分支：`codex/timetable-refresh`。下列提交按问题拆分，便于查看原因、验证和回退；后续重构保留相同修复行为。保留原应用标识、`courses.db` 和 Room 第 1 版结构。
 
 ## 原审阅的 10 个问题

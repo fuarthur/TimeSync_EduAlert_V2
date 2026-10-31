@@ -36,11 +36,13 @@ Import limits are 1 MiB and 1,000 courses. Records must have valid weekdays and 
 
 ## Build and verify
 
-Requires Android SDK 34 and JDK 17 (recommended). Set `ANDROID_HOME` or let Android Studio generate `local.properties` for your SDK. The Gradle wrapper and dependency catalogue are committed.
+Requires Android SDK 37.0, Build Tools 36.0.0 and JDK 17. Use an Android Studio version compatible with AGP 9.5, or build through Gradle directly. Set `ANDROID_HOME` or let Android Studio generate `local.properties` for your SDK. The Gradle wrapper and dependency catalogue are committed.
 
 ```sh
-./gradlew testDebugUnitTest assembleDebug lintDebug
+./gradlew testDebugUnitTest assembleDebug assembleRelease lintDebug lintRelease
 ```
+
+Both build variants are checked explicitly; Lint warnings fail verification.
 
 With a test emulator connected:
 
@@ -53,6 +55,8 @@ Debug APK: `app/build/outputs/apk/debug/app-debug.apk`.
 The code uses Kotlin, Android Views/Material, Room, coroutines and Gson. No account, cloud backend, analytics or network permission is required.
 
 ## Maintenance notes
+
+- [Lint cleanup, dependency versions and verification](docs/LINT_CLEANUP.md)
 
 - [Issue-to-commit map](docs/CHANGES.md)
 - [Measured verification and screenshots](docs/VERIFICATION.md)
