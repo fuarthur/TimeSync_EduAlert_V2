@@ -1,19 +1,18 @@
 [versions]
-agp = "8.7.1"
+agp = "9.5.0"
 gson = "2.10.1"
-kotlin = "2.0.20"
 coreKtx = "1.10.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 appcompat = "1.6.1"
 material = "1.10.0"
-roomRuntime = "2.6.1"
+roomRuntime = "2.8.5"
 viewpager2 = "1.1.0"
 lifecycle = "2.6.2"
-robolectric = "4.13"
+robolectric = "4.17"
 androidTestCore = "1.5.0"
-ksp = "2.0.20-1.0.24"
+ksp = "2.3.13"
 
 [libraries]
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
@@ -34,4 +33,3 @@ material = { group = "com.google.android.material", name = "material", version.r
 [plugins]
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 android-application = { id = "com.android.application", version.ref = "agp" }
-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

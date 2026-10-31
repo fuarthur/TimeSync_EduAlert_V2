@@ -1,12 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "com.ams.timesyncedualertv2"
-    compileSdk = 34
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.ams.timesyncedualertv2"
@@ -27,14 +26,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     testOptions {
         unitTests.isIncludeAndroidResources = true
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
 }
 

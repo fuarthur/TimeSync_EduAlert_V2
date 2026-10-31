@@ -15,11 +15,11 @@ class RescheduleReceiverTest {
     @Test
     fun missingOrUnrelatedActionsDoNotStartRescheduling() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        listOf(null, "com.ams.timesyncedualertv2.UNRELATED", Intent.ACTION_PACKAGE_ADDED)
-            .forEach { action ->
-                val receiver = ReminderRescheduleReceiver()
-                receiver.onReceive(context, Intent().setAction(action))
-                assertFalse("Unexpected background work for $action", shadowOf(receiver).wentAsync())
-            }
+        listOf(null, "com.ams.timesyncedualertv2.UNRELATED", Intent.ACTION_PACKAGE_ADDED).forEach {
+            action ->
+            val receiver = ReminderRescheduleReceiver()
+            receiver.onReceive(context, Intent().setAction(action))
+            assertFalse("Unexpected background work for $action", shadowOf(receiver).wentAsync())
+        }
     }
 }
