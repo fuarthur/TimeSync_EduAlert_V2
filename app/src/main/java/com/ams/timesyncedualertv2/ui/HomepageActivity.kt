@@ -219,9 +219,9 @@ class HomepageActivity : AppCompatActivity() {
         }
         val height =
             (root.height - root.paddingTop - root.paddingBottom) / resources.displayMetrics.density
-        findViewById<View>(R.id.toolbar).visibility =
+        toolbar.visibility =
             if (keyboardVisible && height < 420) View.GONE else View.VISIBLE
-        findViewById<View>(R.id.tab_layout).visibility =
+        tabs.visibility =
             if (keyboardVisible && height < 300) View.GONE else View.VISIBLE
         findViewById<View>(R.id.add_course_button).visibility =
             if (keyboardVisible) View.GONE else View.VISIBLE
