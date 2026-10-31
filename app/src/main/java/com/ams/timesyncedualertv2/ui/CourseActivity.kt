@@ -45,11 +45,12 @@ class CourseActivity:AppCompatActivity() {
         setContentView(R.layout.activity_add_course)
         Ui.setup(this) { onBackPressedDispatcher.onBackPressed() }
         courseId=intent.getIntExtra("course_id",-1)
+        val duplicateId=intent.getIntExtra("duplicate_id",-1)
         findViewById<MaterialToolbar>(R.id.toolbar).setTitle(if(courseId==-1) R.string.add_course else R.string.edit_course)
         field(R.id.edittext_course_description).inputType=InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
         field(R.id.edittext_course_description).minLines=3
         field(R.id.edittext_course_description).maxLines=6
-        draftLoaded=state?.getBoolean("draft_loaded") ?: (courseId==-1)
+        draftLoaded=state?.getBoolean("draft_loaded") ?: (courseId==-1 && duplicateId==-1)
         if(state!=null) {
             startTime=state.getString("draft_start",""); endTime=state.getString("draft_end","")
             selectedColor=state.getInt("draft_color",selectedColor)
@@ -69,13 +70,14 @@ class CourseActivity:AppCompatActivity() {
         button(R.id.button_submit).setText(if(courseId==-1) R.string.save_course else R.string.save_changes)
         button(R.id.button_submit).setOnClickListener { save() }
         if(initial.isEmpty() && state==null) initial=signature()
-        if(courseId!=-1 && !draftLoaded) {
+        if((courseId!=-1 || duplicateId!=-1) && !draftLoaded) {
             button(R.id.button_submit).isEnabled=false
             lifecycleScope.launch {
                 try {
-                    val course=repository.get(courseId)
+                    val course=repository.get(if(courseId!=-1) courseId else duplicateId)
                     if(course==null) { Ui.message(this@CourseActivity,R.string.missing_course); finish(); return@launch }
                     fill(course)
+                    if(duplicateId!=-1) { field(R.id.edittext_course_name).setText(getString(R.string.copy_name,course.name).take(120)); Ui.message(this@CourseActivity,R.string.duplicate_hint) }
                     draftLoaded=true; initial=signature()
                 } catch(e:Exception) { if(e is CancellationException) throw e; Ui.error(this@CourseActivity,e) }
                 finally { button(R.id.button_submit).isEnabled=true }

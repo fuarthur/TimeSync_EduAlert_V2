@@ -1,6 +1,9 @@
 package com.ams.timesyncedualertv2.ui
 
 import android.content.Intent
+import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.material.snackbar.Snackbar
+import com.ams.timesyncedualertv2.domain.BackupCodec
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
@@ -32,7 +35,20 @@ import java.util.Date
 class HomepageActivity:AppCompatActivity() {
     val searchQuery=MutableStateFlow("")
     private var allCourses=emptyList<CourseEntity>()
-    fun openCourse(course:CourseEntity) { startActivity(Intent(this,CourseDetailsActivity::class.java).putExtra("course_id",course.id)) }
+    private val details=registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val json=result.data?.getStringExtra("deleted_course")
+        if(result.resultCode==RESULT_OK && json!=null) {
+            val deleted=runCatching { BackupCodec.decode("[$json]").single() }.getOrNull()
+            if(deleted!=null) Snackbar.make(findViewById(R.id.root),R.string.course_deleted,Snackbar.LENGTH_LONG)
+                .setAnchorView(findViewById(R.id.add_course_button)).setAction(R.string.undo) {
+                    lifecycleScope.launch {
+                        try { (application as TimeSyncApplication).repository.restore(deleted); NotificationUtils.refreshReminders(this@HomepageActivity,lifecycleScope); Ui.message(this@HomepageActivity,R.string.course_restored) }
+                        catch(e:Exception) { if(e is CancellationException) throw e; Ui.message(this@HomepageActivity,R.string.deleted_restore_failed) }
+                    }
+                }.show()
+        }
+    }
+    fun openCourse(course:CourseEntity) { details.launch(Intent(this,CourseDetailsActivity::class.java).putExtra("course_id",course.id)) }
     override fun onCreate(savedInstanceState:Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_homepage)

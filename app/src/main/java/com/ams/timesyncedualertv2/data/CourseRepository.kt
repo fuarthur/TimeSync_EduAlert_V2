@@ -36,5 +36,12 @@ class CourseRepository(private val db:AppDatabase) {
     suspend fun delete(id:Int):CourseEntity? = db.withTransaction {
         dao.getCourseById(id)?.also { dao.delete(it) }
     }
+    suspend fun restore(course:CourseEntity):Int = db.withTransaction {
+        var valid=CourseRules.validate(course)
+        val others=dao.getAllCourses()
+        others.firstOrNull { CourseRules.overlaps(it,valid) }?.let { throw CourseConflictException(it.name) }
+        if(others.any { it.id==valid.id }) valid=valid.copy(id=0)
+        dao.insert(valid).toInt()
+    }
     suspend fun clear()=dao.deleteAllCourses()
 }
