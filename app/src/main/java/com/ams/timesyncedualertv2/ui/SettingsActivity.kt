@@ -20,6 +20,7 @@ import com.ams.timesyncedualertv2.db.CourseDao
 import com.ams.timesyncedualertv2.model.CourseEntity
 import com.ams.timesyncedualertv2.util.NotificationUtils
 import com.google.gson.Gson
+import com.ams.timesyncedualertv2.domain.BackupCodec
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -215,7 +216,7 @@ class SettingsActivity : AppCompatActivity() {
                     // 将 JSON 数据转换为 CourseEntity 对象
                     val gson = Gson()
                     val importedCourses =
-                        gson.fromJson(json, Array<CourseEntity>::class.java).toList()
+                        BackupCodec.decode(json)
 
                     // 插入到数据库中
                     val db = Room.databaseBuilder(
