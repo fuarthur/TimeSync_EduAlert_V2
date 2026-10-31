@@ -101,6 +101,9 @@ class HomepageActivity:AppCompatActivity() {
         }
     }
     private fun renderNext() {
+        val toolbar=findViewById<MaterialToolbar>(R.id.toolbar)
+        val currentDate=DateFormat.getDateInstance(DateFormat.FULL).format(Date())
+        if(toolbar.subtitle?.toString()!=currentDate) toolbar.subtitle=currentDate
         val card=findViewById<View>(R.id.next_course_card)
         val next=Timetable.next(allCourses,ZonedDateTime.now())
         val root=findViewById<View>(R.id.root)

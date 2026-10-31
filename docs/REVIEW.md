@@ -8,7 +8,7 @@ Review range: 73374cd..f00a02f. Read-only reviewer found no critical issue and s
 - [x] A delivering alarm must not overwrite a newer course schedule.
 - [x] Notification entry must retain the homepage result path for delete Undo.
 - [x] Long summary content, landscape and the keyboard must leave timetable rows usable.
-- [ ] Minor: refresh the toolbar date across midnight.
+- [x] Minor: refresh the toolbar date across midnight.
 
 Native verification before this follow-up: all 5 Android tests passed (four full user flows plus the existing package-context smoke test) on the isolated API 33 emulator. Local suite before this pass: 30 tests; debug build and Lint passed. Later results supersede these counts.
 
@@ -25,3 +25,5 @@ Alarm delivery: controlled stale-delivery interleaving and current-delivery rear
 Notification routing: both the notification PendingIntent target and Home result-launcher regression failed before the fix. All 39 local tests passed after routing notification entry through Home.
 
 Layout regression: the long-location landscape test failed with a collapsed pager before the fix. Bounded text, adaptive summary visibility and IME-aware list spacing passed all 7 native tests; all 39 local tests and Lint also passed. Test interactions wait for visible controls and asynchronous list updates.
+
+Minor date follow-up: the toolbar date is refreshed on resume/periodic render and only assigned when changed. No important findings remain unaddressed.
