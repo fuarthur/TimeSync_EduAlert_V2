@@ -1,0 +1,41 @@
+# Timetable Refresh Implementation Plan
+
+> **For agentic workers:** Use superpowers:executing-plans for sequential issue commits and a final independent review.
+
+**Goal:** Repair all reviewed bugs and deliver a reliable, readable local timetable app.
+**Architecture:** Retain Room schema; add shared database/repository and validated time/backup/reminder boundaries. Native Material screens observe current data.
+**Tech Stack:** Kotlin 2.0.20, Android Views, Room 2.6.1, Material, JUnit, AndroidX device tests.
+**Spec:** docs/superpowers/specs/2026-10-30-timetable-refresh-design.md
+
+## Global Constraints
+- Preserve applicationId com.ams.timesyncedualertv2, database courses.db version 1 and legacy JSON imports.
+- minSdk 33 / compileSdk 34 / targetSdk 34.
+- No cloud/account/analytics; separate commits for each review issue.
+
+## Review Focus
+- Invalid/cancelled/oversized imports retain all previous courses.
+- Alarm triggers around midnight, week rollover, DST and denied permissions.
+- Draft restoration and system Back after edits/import/deletion.
+- Empty results, long names, dark theme and large fonts.
+- Concurrent taps/writes never create overlapping duplicate courses.
+
+## Tasks (ordered, individually committed)
+- [ ] 1. Build reproducibility: track wrapper/catalogue, stop ignoring tests, add test infrastructure. Verify tracked snapshot wrapper and baseline build.
+- [ ] 2. Safe import replacement: picker is read-only until validated result; transactional replacement. Regression: cancellation/error keeps original records.
+- [ ] 3. Strict import validation: central CourseValidation and BackupCodec; reject empty weekdays, malformed times/IDs/nulls. JUnit malformed fixtures RED→GREEN.
+- [ ] 4. One-tap course details: remove nested listener. Device regression RED→GREEN.
+- [ ] 5. Course interval validation: reject zero/reversed intervals and blank names. Unit + device regression RED→GREEN.
+- [ ] 6. Reminder scheduling: pure next-trigger calculator, AlarmManager scheduler, receiver registration/reschedule. Unit rollover cases RED→GREEN and device alarm inspection.
+- [ ] 7. Reminder preference: enforce enabled state and permission in scheduling boundary. Device disable/reopen regression RED→GREEN.
+- [ ] 8. Draft restoration: saved instance state for form values, avoid database refill over restored draft. Device recreate regression RED→GREEN.
+- [ ] 9. Live course lists: DAO Flow and view-lifecycle observation; back-stack navigation uses finish(). Device system Back regression RED→GREEN.
+- [ ] 10. Numeric input: bounded toIntOrNull parsing and numeric keyboard. Overflow regression RED→GREEN.
+- [ ] 11. Data architecture: application-level database/repository, atomic conflict-check-and-save, IO backup service, consistent LocalTime use. Run unit/device suites.
+- [ ] 12. Material UI redesign: unified light/dark tokens, proper app bars, readable list, accessible form/settings, status/error/empty states, localization. Verify emulator captures.
+- [ ] 13. Seven-day timetable, next-class summary and search. Unit boundary fixtures and device filters.
+- [ ] 14. Duplicate course and delete undo. Device duplicate draft + restore.
+- [ ] 15. Versioned backup preview/export, limits and legacy roundtrip. Unit/device replacement roundtrip.
+- [ ] 16. Final independent review, targeted repairs, build/lint/device suite, screenshots and commit-to-issue changelog.
+
+## Progress
+Execution notes and test evidence are recorded in docs/IMPLEMENTATION.md. All issue fixes remain independently identifiable even when later refactors replace their implementation.
