@@ -7,7 +7,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.room.Room
 import com.ams.timesyncedualertv2.R
 import com.ams.timesyncedualertv2.db.AppDatabase
 import com.ams.timesyncedualertv2.util.NotificationUtils

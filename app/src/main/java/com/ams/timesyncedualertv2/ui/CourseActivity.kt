@@ -13,7 +13,6 @@ import android.widget.EditText
 import java.util.Calendar
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
-import androidx.room.Room
 import com.ams.timesyncedualertv2.db.AppDatabase
 import com.ams.timesyncedualertv2.model.CourseEntity
 import com.ams.timesyncedualertv2.util.NotificationUtils
@@ -116,95 +115,21 @@ class CourseActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // 将 startTime 和 endTime 转换为时间对象
-            val newStartTime = timeFormat.parse(startTime)
-            val newEndTime = timeFormat.parse(endTime)
-
+            buttonSubmit.isEnabled=false
             lifecycleScope.launch {
-                var hasConflict = false
-
-                for (weekday in weekdays) {
-                    // 获取当天的所有课程
-                    val existingCourses = courseDao.getCoursesForWeekday(weekday)
-
-                    for (course in existingCourses) {
-                        // 跳过当前正在编辑的课程
-                        if (course.id == courseId) {
-                            continue
-                        }
-
-                        val existingStartTime = timeFormat.parse(course.startTime)
-                        val existingEndTime = timeFormat.parse(course.endTime)
-
-                        // 检查是否有时间冲突
-                        if (newStartTime != null && newEndTime != null && existingStartTime != null && existingEndTime != null) {
-                            if (newStartTime.before(existingEndTime) && newEndTime.after(
-                                    existingStartTime
-                                )
-                            ) {
-                                hasConflict = true
-                                break
-                            }
-                        }
-                    }
-
-                    if (hasConflict) break
-                }
-
-                // 如果有冲突，提示用户并阻止添加
-                if (hasConflict) {
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@CourseActivity,
-                            "Time conflict with an existing course",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                } else {
-                    // 编辑课程时，覆盖已有课程
-                    if (courseId != -1) {
-                        courseDao.updateCourse(
-                            courseId,
-                            weekdays,
-                            startTime,
-                            endTime,
-                            courseName,
-                            location,
-                            description,
-                            selectedColor
-                        )
-                        runOnUiThread {
-                            Toast.makeText(
-                                this@CourseActivity,
-                                "Course updated successfully",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    } else {
-                        val courseEntity = CourseEntity(
-                            weekday = weekdays,
-                            startTime = startTime,
-                            endTime = endTime,
-                            name = courseName,
-                            location = location,
-                            description = description,
-                            color = selectedColor
-                        )
-                        courseDao.insert(courseEntity)
-                        runOnUiThread {
-                            Toast.makeText(
-                                this@CourseActivity,
-                                "Course added successfully",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-
-                    NotificationUtils.refreshReminders(this@CourseActivity, lifecycleScope)
-
-                    val intent = Intent(this@CourseActivity, HomepageActivity::class.java)
-                    startActivity(intent)
-                }
+                try {
+                    val repository=(application as com.ams.timesyncedualertv2.TimeSyncApplication).repository
+                    repository.save(CourseEntity(
+                        id=if(courseId==-1) 0 else courseId, weekday=weekdays,
+                        startTime=startTime, endTime=endTime, name=courseName,
+                        location=location, description=description, color=selectedColor
+                    ))
+                    NotificationUtils.refreshReminders(this@CourseActivity,lifecycleScope)
+                    finish()
+                } catch(e: Exception) {
+                    if(e is kotlinx.coroutines.CancellationException) throw e
+                    Toast.makeText(this@CourseActivity,e.message ?: "Could not save course",Toast.LENGTH_LONG).show()
+                } finally { buttonSubmit.isEnabled=true }
             }
         }
 

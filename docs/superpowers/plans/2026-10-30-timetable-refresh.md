@@ -20,17 +20,17 @@
 - Concurrent taps/writes never create overlapping duplicate courses.
 
 ## Tasks (ordered, individually committed)
-- [ ] 1. Build reproducibility: track wrapper/catalogue, stop ignoring tests, add test infrastructure. Verify tracked snapshot wrapper and baseline build.
-- [ ] 2. Safe import replacement: picker is read-only until validated result; transactional replacement. Regression: cancellation/error keeps original records.
-- [ ] 3. Strict import validation: central CourseValidation and BackupCodec; reject empty weekdays, malformed times/IDs/nulls. JUnit malformed fixtures RED→GREEN.
-- [ ] 4. One-tap course details: remove nested listener. Device regression RED→GREEN.
-- [ ] 5. Course interval validation: reject zero/reversed intervals and blank names. Unit + device regression RED→GREEN.
-- [ ] 6. Reminder scheduling: pure next-trigger calculator, AlarmManager scheduler, receiver registration/reschedule. Unit rollover cases RED→GREEN and device alarm inspection.
-- [ ] 7. Reminder preference: enforce enabled state and permission in scheduling boundary. Device disable/reopen regression RED→GREEN.
-- [ ] 8. Draft restoration: saved instance state for form values, avoid database refill over restored draft. Device recreate regression RED→GREEN.
-- [ ] 9. Live course lists: DAO Flow and view-lifecycle observation; back-stack navigation uses finish(). Device system Back regression RED→GREEN.
-- [ ] 10. Numeric input: bounded toIntOrNull parsing and numeric keyboard. Overflow regression RED→GREEN.
-- [ ] 11. Data architecture: application-level database/repository, atomic conflict-check-and-save, IO backup service, consistent LocalTime use. Run unit/device suites.
+- [x] 1. Build reproducibility: track wrapper/catalogue, stop ignoring tests, add test infrastructure. Verify tracked snapshot wrapper and baseline build.
+- [x] 2. Safe import replacement: picker is read-only until validated result; transactional replacement. Regression: cancellation/error keeps original records.
+- [x] 3. Strict import validation: central CourseValidation and BackupCodec; reject empty weekdays, malformed times/IDs/nulls. JUnit malformed fixtures RED→GREEN.
+- [x] 4. One-tap course details: remove nested listener. Device regression RED→GREEN.
+- [x] 5. Course interval validation: reject zero/reversed intervals and blank names. Unit + device regression RED→GREEN.
+- [x] 6. Reminder scheduling: pure next-trigger calculator, AlarmManager scheduler, receiver registration/reschedule. Unit rollover cases RED→GREEN and device alarm inspection.
+- [x] 7. Reminder preference: enforce enabled state and permission in scheduling boundary. Device disable/reopen regression RED→GREEN.
+- [x] 8. Draft restoration: saved instance state for form values, avoid database refill over restored draft. Device recreate regression RED→GREEN.
+- [x] 9. Live course lists: DAO Flow and view-lifecycle observation; back-stack navigation uses finish(). Device system Back regression RED→GREEN.
+- [x] 10. Numeric input: bounded toIntOrNull parsing and numeric keyboard. Overflow regression RED→GREEN.
+- [x] 11. Data architecture: application-level database/repository, atomic conflict-check-and-save, IO backup service, consistent LocalTime use. Run unit/device suites.
 - [ ] 12. Material UI redesign: unified light/dark tokens, proper app bars, readable list, accessible form/settings, status/error/empty states, localization. Verify emulator captures.
 - [ ] 13. Seven-day timetable, next-class summary and search. Unit boundary fixtures and device filters.
 - [ ] 14. Duplicate course and delete undo. Device duplicate draft + restore.

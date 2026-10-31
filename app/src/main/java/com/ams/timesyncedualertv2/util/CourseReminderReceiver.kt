@@ -3,7 +3,6 @@ package com.ams.timesyncedualertv2.util
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.room.Room
 import com.ams.timesyncedualertv2.db.AppDatabase
 import com.ams.timesyncedualertv2.domain.CourseRules
 import kotlinx.coroutines.*

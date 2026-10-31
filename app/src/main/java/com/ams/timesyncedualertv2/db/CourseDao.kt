@@ -9,7 +9,10 @@ interface CourseDao {
     fun observeAll(): kotlinx.coroutines.flow.Flow<List<CourseEntity>>
 
     @Insert
-    suspend fun insert(course: CourseEntity)
+    suspend fun insert(course: CourseEntity): Long
+
+    @Update
+    suspend fun update(course: CourseEntity)
 
     @Insert
     suspend fun insertAll(courses: List<CourseEntity>)

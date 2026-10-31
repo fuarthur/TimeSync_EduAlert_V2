@@ -3,7 +3,6 @@ package com.ams.timesyncedualertv2.ui
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -12,19 +11,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.room.Room
-import androidx.room.withTransaction
 import com.ams.timesyncedualertv2.R
 import com.ams.timesyncedualertv2.db.AppDatabase
 import com.ams.timesyncedualertv2.db.CourseDao
 import com.ams.timesyncedualertv2.model.CourseEntity
 import com.ams.timesyncedualertv2.util.NotificationUtils
-import com.google.gson.Gson
-import com.ams.timesyncedualertv2.domain.BackupCodec
 import kotlinx.coroutines.launch
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.OutputStreamWriter
 
 class SettingsActivity : AppCompatActivity() {
     private val switchEnableNotifications: SwitchCompat by lazy { findViewById(R.id.switch_enable_notifications) }
@@ -198,96 +190,31 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    // 从文件 URI 中读取数据并导入课程
-    private fun importCoursesFromUri(uri: Uri) {
-        val contentResolver = contentResolver
+    private val repository get()=(application as com.ams.timesyncedualertv2.TimeSyncApplication).repository
+    private val backup get()=com.ams.timesyncedualertv2.data.ScheduleBackupService(this,repository)
+
+    private fun importCoursesFromUri(uri:Uri) {
         lifecycleScope.launch {
             try {
-                contentResolver.openInputStream(uri)?.use { inputStream ->
-                    val reader = BufferedReader(InputStreamReader(inputStream))
-                    val json = reader.readText()
-                    reader.close()
-
-                    // 将 JSON 数据转换为 CourseEntity 对象
-                    val gson = Gson()
-                    val importedCourses =
-                        BackupCodec.decode(json)
-
-                    // 插入到数据库中
-                    val db = AppDatabase.getInstance(applicationContext)
-                    val courseDao = db.courseDao()
-                    db.withTransaction {
-                        courseDao.deleteAllCourses()
-                        courseDao.insertAll(importedCourses)
-                    }
-
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@SettingsActivity,
-                            "Courses imported successfully.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            } catch (e: Exception) {
-                Log.d("User-debug", e.message.toString())
-                e.printStackTrace()
-                runOnUiThread {
-                    Toast.makeText(
-                        this@SettingsActivity,
-                        "Failed to import courses.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                val courses=backup.read(uri)
+                repository.replace(courses)
+                NotificationUtils.refreshReminders(this@SettingsActivity,lifecycleScope)
+                Toast.makeText(this@SettingsActivity,"Courses imported successfully",Toast.LENGTH_SHORT).show()
+            } catch(e:Exception) {
+                if(e is kotlinx.coroutines.CancellationException) throw e
+                Toast.makeText(this@SettingsActivity,e.message ?: "Could not import courses",Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    // 将课程导出到用户选择的文件路径
-    private fun exportCoursesToUri(uri: Uri) {
-        val contentResolver = contentResolver
-        val db = AppDatabase.getInstance(applicationContext)
-        val courseDao = db.courseDao()
-
+    private fun exportCoursesToUri(uri:Uri) {
         lifecycleScope.launch {
-            val courses = courseDao.getAllCourses()  // 获取所有课程
-            if (courses.isNotEmpty()) {
-                val gson = Gson()
-                val json = gson.toJson(courses)  // 将课程转换为 JSON
-
-                try {
-                    contentResolver.openOutputStream(uri)?.use { outputStream ->
-                        val writer = OutputStreamWriter(outputStream)
-                        writer.write(json)
-                        writer.flush()
-                        writer.close()
-
-                        runOnUiThread {
-                            Toast.makeText(
-                                this@SettingsActivity,
-                                "Courses exported successfully.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@SettingsActivity,
-                            "Failed to export courses.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            } else {
-                runOnUiThread {
-                    Toast.makeText(
-                        this@SettingsActivity,
-                        "No courses to export.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+            try {
+                backup.write(uri)
+                Toast.makeText(this@SettingsActivity,"Courses exported successfully",Toast.LENGTH_SHORT).show()
+            } catch(e:Exception) {
+                if(e is kotlinx.coroutines.CancellationException) throw e
+                Toast.makeText(this@SettingsActivity,"Could not export courses",Toast.LENGTH_LONG).show()
             }
         }
     }

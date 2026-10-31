@@ -11,7 +11,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
 import com.ams.timesyncedualertv2.R
 import com.ams.timesyncedualertv2.db.AppDatabase
 import com.ams.timesyncedualertv2.db.CourseDao

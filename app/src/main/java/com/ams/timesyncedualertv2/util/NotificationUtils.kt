@@ -11,7 +11,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.room.Room
 import com.ams.timesyncedualertv2.R
 import com.ams.timesyncedualertv2.db.AppDatabase
 import com.ams.timesyncedualertv2.domain.CourseRules
@@ -47,14 +46,14 @@ object NotificationUtils {
         if (!settings(context).getBoolean("enable_notifications",true)) return@withLock
         if (ContextCompat.checkSelfPermission(context,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) return@withLock
         val db=AppDatabase.getInstance(context.applicationContext)
-        try {
+        run {
             val minutes=settings(context).getInt("reminder_time",10).coerceIn(1,1440)
             db.courseDao().getAllCourses().forEach { course ->
                 if (runCatching { CourseRules.validate(course) }.isSuccess) {
                     course.weekday.forEach { day -> scheduleCourse(context,course,day,minutes) }
                 }
             }
-        } finally { /* Application owns the database. */ }
+        }
     }
 
     @Synchronized
