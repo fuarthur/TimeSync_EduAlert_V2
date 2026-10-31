@@ -56,7 +56,6 @@ class CourseAdapter(private val context: Context, courses: List<CourseEntity>) :
         holder.timeTextView.setTextColor(textColor)
 
         holder.itemView.setOnClickListener {
-            holder.itemView.setOnClickListener {
                 val intent = Intent(context, CourseDetailsActivity::class.java).apply {
                     putExtra("course_name", course.name)
                     putExtra("course_location", course.location)
@@ -66,7 +65,6 @@ class CourseAdapter(private val context: Context, courses: List<CourseEntity>) :
                     putExtra("course_id", course.id)
                 }
                 context.startActivity(intent)
-            }
         }
     }
 
