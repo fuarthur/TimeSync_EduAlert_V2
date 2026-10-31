@@ -299,6 +299,11 @@ class CourseActivity : AppCompatActivity() {
             return false
         }
 
+        if (!isEndTimeValid(startTime, endTime)) {
+            Toast.makeText(this, "End time must be later than start time", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
         if (courseName.isBlank()) {
             Toast.makeText(this, "Please enter the course name", Toast.LENGTH_SHORT).show()
             return false
