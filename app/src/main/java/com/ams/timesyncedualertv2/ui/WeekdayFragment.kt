@@ -1,91 +1,48 @@
 package com.ams.timesyncedualertv2.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ams.timesyncedualertv2.R
-import com.ams.timesyncedualertv2.db.AppDatabase
-import com.ams.timesyncedualertv2.db.CourseDao
+import com.ams.timesyncedualertv2.TimeSyncApplication
 import com.ams.timesyncedualertv2.model.CourseAdapter
-import com.ams.timesyncedualertv2.model.CourseEntity
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
-class WeekdayFragment : Fragment() {
-
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var courseAdapter: CourseAdapter
-    private lateinit var courseDao: CourseDao // 声明 courseDao
-
+class WeekdayFragment:Fragment() {
     companion object {
-        private const val ARG_WEEKDAY = "weekday"
-
-        // 创建 fragment 的工厂方法，通过参数生成不同的实例
-        fun newInstance(weekday: String): WeekdayFragment {
-            val fragment = WeekdayFragment()
-            val args = Bundle()
-            args.putString(ARG_WEEKDAY, weekday)
-            fragment.arguments = args
-            return fragment
-        }
+        fun newInstance(weekday:String)=WeekdayFragment().apply { arguments=Bundle().apply { putString("weekday",weekday) } }
     }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_weekday, container, false)
-
-        // 初始化 RecyclerView
-        recyclerView = view.findViewById(R.id.courses_recycler_view)
-        recyclerView.layoutManager = LinearLayoutManager(context)
-
-        // 获取数据库实例并初始化 courseDao
-        val db = AppDatabase.getInstance(requireContext().applicationContext)
-        courseDao = db.courseDao() // 初始化 courseDao
-
-        // 使用 viewLifecycleOwner.lifecycleScope 启动协程，保证协程在 Fragment 销毁时自动取消
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                courseDao.observeAll().collect { all ->
-                    val day=mapWeekdayToInt(arguments?.getString(ARG_WEEKDAY) ?: "")
-                    courseAdapter=CourseAdapter(requireContext(),all.filter { day in it.weekday })
-                    recyclerView.adapter=courseAdapter
+    override fun onCreateView(inflater:LayoutInflater,parent:ViewGroup?,state:Bundle?):View=inflater.inflate(R.layout.fragment_weekday,parent,false)
+    override fun onViewCreated(view:View,state:Bundle?) {
+        val list=view.findViewById<RecyclerView>(R.id.courses_recycler_view)
+        val empty=view.findViewById<View>(R.id.empty_state)
+        val title=view.findViewById<TextView>(R.id.empty_title)
+        val hint=view.findViewById<TextView>(R.id.empty_hint)
+        list.layoutManager=LinearLayoutManager(requireContext())
+        empty.visibility=View.VISIBLE; title.setText(R.string.loading); hint.text=""
+        val day=listOf("Mon.","Tue.","Wed.","Thu.","Fri.").indexOf(arguments?.getString("weekday"))+1
+        viewLifecycleOwner.lifecycleScope.launch { viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            try {
+                (requireActivity().application as TimeSyncApplication).repository.courses.collect { all ->
+                    val courses=all.filter { day in it.weekday }
+                    list.adapter=CourseAdapter(requireContext(),courses)
+                    empty.visibility=if(courses.isEmpty()) View.VISIBLE else View.GONE
+                    title.setText(R.string.empty_day); hint.setText(R.string.empty_day_hint)
                 }
+            } catch(e:Exception) {
+                if(e is CancellationException) throw e
+                empty.visibility=View.VISIBLE; title.setText(R.string.load_failed); hint.setText(R.string.retry)
+                empty.setOnClickListener { requireActivity().recreate() }
             }
-        }
-
-        return view
-    }
-
-    private suspend fun getCoursesForWeekday(weekday: String): List<CourseEntity> {
-        val weekdayInt = mapWeekdayToInt(weekday)
-        Log.d("WeekdayFragment", "getCoursesForWeekday called with weekday: $weekday ($weekdayInt)")
-
-
-        return if (weekdayInt != -1) {
-            courseDao.getCoursesForWeekday(weekdayInt)
-        } else {
-            emptyList()
-        }
-    }
-
-    private fun mapWeekdayToInt(weekday: String): Int {
-        return when (weekday) {
-            "Mon." -> 1
-            "Tue." -> 2
-            "Wed." -> 3
-            "Thu." -> 4
-            "Fri." -> 5
-            else -> -1
-        }
+        } }
     }
 }

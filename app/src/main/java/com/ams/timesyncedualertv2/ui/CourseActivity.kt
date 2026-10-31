@@ -1,262 +1,137 @@
 package com.ams.timesyncedualertv2.ui
 
+import android.app.TimePickerDialog
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.text.InputType
+import android.view.View
 import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
-import com.ams.timesyncedualertv2.R
-import yuku.ambilwarna.AmbilWarnaDialog
-import android.app.TimePickerDialog
-import android.content.Intent
 import android.widget.CheckBox
 import android.widget.EditText
-import java.util.Calendar
-import android.widget.Toast
+import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.ams.timesyncedualertv2.db.AppDatabase
+import com.ams.timesyncedualertv2.R
+import com.ams.timesyncedualertv2.TimeSyncApplication
+import com.ams.timesyncedualertv2.domain.CourseRules
 import com.ams.timesyncedualertv2.model.CourseEntity
 import com.ams.timesyncedualertv2.util.NotificationUtils
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class CourseActivity : AppCompatActivity() {
-    private var startTime: String = ""
-    private var endTime: String = ""
-    private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-    private var courseId: Int = -1
-    private var draftLoaded = false
+class CourseActivity:AppCompatActivity() {
+    private var startTime=""
+    private var endTime=""
+    private var selectedColor=0xFF2456A6.toInt()
+    private var courseId=-1
+    private var draftLoaded=false
+    private var initial=""
+    private var saving=false
+    private val repository get()=(application as TimeSyncApplication).repository
+    private val days get()=listOf(R.id.checkbox_monday,R.id.checkbox_tuesday,R.id.checkbox_wednesday,R.id.checkbox_thursday,R.id.checkbox_friday)
+    private fun field(id:Int)=findViewById<EditText>(id)
+    private fun button(id:Int)=findViewById<Button>(id)
+    private fun signature()=listOf(startTime,endTime,selectedColor.toString(),field(R.id.edittext_course_name).text.toString(),field(R.id.edittext_course_location).text.toString(),field(R.id.edittext_course_description).text.toString(),selectedDays().joinToString()).joinToString("\u0001")
 
-    private val checkboxMonday by lazy { findViewById<CheckBox>(R.id.checkbox_monday) }
-    private val checkboxTuesday by lazy { findViewById<CheckBox>(R.id.checkbox_tuesday) }
-    private val checkboxWednesday by lazy { findViewById<CheckBox>(R.id.checkbox_wednesday) }
-    private val checkboxThursday by lazy { findViewById<CheckBox>(R.id.checkbox_thursday) }
-    private val checkboxFriday by lazy { findViewById<CheckBox>(R.id.checkbox_friday) }
-
-    private val editTextCourseName by lazy { findViewById<EditText>(R.id.edittext_course_name) }
-    private val editTextLocation by lazy { findViewById<EditText>(R.id.edittext_course_location) }
-    private val editTextDescription by lazy { findViewById<EditText>(R.id.edittext_course_description) }
-
-    private val buttonSelectStartTime by lazy { findViewById<Button>(R.id.button_start_time) }
-    private val buttonSelectEndTime by lazy { findViewById<Button>(R.id.button_end_time) }
-    private var selectedColor: Int = Color.RED // Default color
-    private val buttonSelectColor: Button by lazy { findViewById(R.id.button_select_color) }
-    private val buttonSubmit: Button by lazy { findViewById(R.id.button_submit) }
-    private val buttonBack: Button by lazy { findViewById(R.id.button_back) }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreate(state:Bundle?) {
+        super.onCreate(state)
         setContentView(R.layout.activity_add_course)
-
-        val db = AppDatabase.getInstance(applicationContext)
-        val courseDao = db.courseDao()
-
-        courseId = intent.getIntExtra("course_id", -1)
-
-        draftLoaded = savedInstanceState?.getBoolean("draft_loaded") ?: (courseId == -1)
-        if (savedInstanceState != null) {
-            startTime = savedInstanceState.getString("draft_start", "")
-            endTime = savedInstanceState.getString("draft_end", "")
-            selectedColor = savedInstanceState.getInt("draft_color", Color.RED)
-            if (startTime.isNotEmpty()) buttonSelectStartTime.text = startTime
-            if (endTime.isNotEmpty()) buttonSelectEndTime.text = endTime
+        Ui.setup(this) { onBackPressedDispatcher.onBackPressed() }
+        courseId=intent.getIntExtra("course_id",-1)
+        findViewById<MaterialToolbar>(R.id.toolbar).setTitle(if(courseId==-1) R.string.add_course else R.string.edit_course)
+        field(R.id.edittext_course_description).inputType=InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+        draftLoaded=state?.getBoolean("draft_loaded") ?: (courseId==-1)
+        if(state!=null) {
+            startTime=state.getString("draft_start",""); endTime=state.getString("draft_end","")
+            selectedColor=state.getInt("draft_color",selectedColor)
+            initial=state.getString("draft_initial","")
         }
-        if (courseId != -1 && !draftLoaded) {
-            // 编辑课程，预填充课程信息
-            lifecycleScope.launch {
-                val course = courseDao.getCourseById(courseId)
-                course?.let {
-                    runOnUiThread {
-                        fillCourseDetails(it)
-                    }
-                }
+        updateTimeButtons(); updateColor()
+        button(R.id.button_start_time).setOnClickListener { pickTime(startTime) { value ->
+            startTime=value
+            if(endTime.isBlank() || runCatching { CourseRules.time(endTime)<=CourseRules.time(startTime) }.getOrDefault(true)) {
+                val later=CourseRules.time(startTime).plusHours(1)
+                endTime=if(later>CourseRules.time(startTime)) format(later) else "23:59"
             }
-        }
-
-        buttonSelectStartTime.setOnClickListener {
-            showTimePickerDialog { selectedTime ->
-                startTime = selectedTime
-                buttonSelectStartTime.text = startTime
-                if (endTime.isBlank() || !isEndTimeValid(startTime, endTime)) {
-                    endTime = startTime
-                    buttonSelectEndTime.text = endTime
-                }
-            }
-        }
-
-
-        buttonSelectEndTime.setOnClickListener {
-            showTimePickerDialog { selectedTime ->
-                if (isEndTimeValid(startTime, selectedTime)) {
-                    endTime = selectedTime
-                    buttonSelectEndTime.text = endTime
-                } else {
-                    Toast.makeText(
-                        this,
-                        "End time must be later than start time",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        }
-
-        buttonSelectColor.setBackgroundColor(selectedColor)
-        buttonSelectColor.setOnClickListener {
-            openColorPickerDialog()
-        }
-
-        buttonSubmit.setOnClickListener {
-            val weekdays = getSelectedWeekdays()
-            val courseName = editTextCourseName.text.toString()
-            val location = editTextLocation.text.toString()
-            val description = editTextDescription.text.toString()
-
-            if (!checkElements(weekdays, startTime, endTime, courseName, location, description)) {
-                return@setOnClickListener
-            }
-
-            buttonSubmit.isEnabled=false
+            updateTimeButtons()
+        } }
+        button(R.id.button_end_time).setOnClickListener { pickTime(endTime.ifBlank { startTime }) { endTime=it; updateTimeButtons() } }
+        button(R.id.button_select_color).setOnClickListener { chooseColor() }
+        button(R.id.button_submit).setText(if(courseId==-1) R.string.save_course else R.string.save_changes)
+        button(R.id.button_submit).setOnClickListener { save() }
+        if(initial.isEmpty() && state==null) initial=signature()
+        if(courseId!=-1 && !draftLoaded) {
+            button(R.id.button_submit).isEnabled=false
             lifecycleScope.launch {
                 try {
-                    val repository=(application as com.ams.timesyncedualertv2.TimeSyncApplication).repository
-                    repository.save(CourseEntity(
-                        id=if(courseId==-1) 0 else courseId, weekday=weekdays,
-                        startTime=startTime, endTime=endTime, name=courseName,
-                        location=location, description=description, color=selectedColor
-                    ))
-                    NotificationUtils.refreshReminders(this@CourseActivity,lifecycleScope)
-                    finish()
-                } catch(e: Exception) {
-                    if(e is kotlinx.coroutines.CancellationException) throw e
-                    Toast.makeText(this@CourseActivity,e.message ?: "Could not save course",Toast.LENGTH_LONG).show()
-                } finally { buttonSubmit.isEnabled=true }
+                    val course=repository.get(courseId)
+                    if(course==null) { Ui.message(this@CourseActivity,R.string.missing_course); finish(); return@launch }
+                    fill(course)
+                    draftLoaded=true; initial=signature()
+                } catch(e:Exception) { if(e is CancellationException) throw e; Ui.error(this@CourseActivity,e) }
+                finally { button(R.id.button_submit).isEnabled=true }
             }
         }
-
-
-
-        buttonBack.setOnClickListener {
-            finish()
-        }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString("draft_start", startTime)
-        outState.putString("draft_end", endTime)
-        outState.putInt("draft_color", selectedColor)
-        outState.putBoolean("draft_loaded", draftLoaded)
-        super.onSaveInstanceState(outState)
-    }
-
-    private fun fillCourseDetails(course: CourseEntity) {
-        editTextCourseName.setText(course.name)
-        editTextLocation.setText(course.location)
-        buttonSelectStartTime.text = course.startTime
-        buttonSelectEndTime.text = course.endTime
-        editTextDescription.setText(course.description)
-        selectedColor = course.color
-        buttonSelectColor.setBackgroundColor(selectedColor)
-        startTime = course.startTime
-        endTime = course.endTime
-        draftLoaded = true
-
-        course.weekday.forEach {
-            when (it) {
-                1 -> checkboxMonday.isChecked = true
-                2 -> checkboxTuesday.isChecked = true
-                3 -> checkboxWednesday.isChecked = true
-                4 -> checkboxThursday.isChecked = true
-                5 -> checkboxFriday.isChecked = true
+        onBackPressedDispatcher.addCallback(this,object:OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if(saving) return
+                if(signature()==initial) finish() else MaterialAlertDialogBuilder(this@CourseActivity)
+                    .setTitle(R.string.unsaved_title).setMessage(R.string.unsaved_message)
+                    .setNegativeButton(R.string.keep_editing,null).setPositiveButton(R.string.discard) { _,_->finish() }.show()
             }
-        }
+        })
     }
 
-    private fun showTimePickerDialog(onTimeSelected: (String) -> Unit) {
-        val calendar = Calendar.getInstance()
-        val hour = calendar.get(Calendar.HOUR_OF_DAY)
-        val minute = calendar.get(Calendar.MINUTE)
-
-        val timePickerDialog = TimePickerDialog(this, { _, selectedHour, selectedMinute ->
-            val formattedTime =
-                String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute)
-            onTimeSelected(formattedTime)
-        }, hour, minute, true)
-
-        timePickerDialog.show()
+    private fun selectedDays()=days.mapIndexedNotNull { index,id -> if(findViewById<CheckBox>(id).isChecked) index+1 else null }
+    private fun fill(c:CourseEntity) {
+        field(R.id.edittext_course_name).setText(c.name); field(R.id.edittext_course_location).setText(c.location)
+        field(R.id.edittext_course_description).setText(c.description)
+        startTime=c.startTime; endTime=c.endTime; selectedColor=c.color
+        days.forEachIndexed { index,id -> findViewById<CheckBox>(id).isChecked=index+1 in c.weekday }
+        updateTimeButtons(); updateColor()
     }
-
-    private fun isEndTimeValid(startTime: String, endTime: String): Boolean {
-        return try {
-            val startDate = timeFormat.parse(startTime)
-            val endDate = timeFormat.parse(endTime)
-            startDate != null && endDate != null && endDate.after(startDate)
-        } catch (e: Exception) {
-            false
+    private fun updateTimeButtons() {
+        button(R.id.button_start_time).text=startTime.ifBlank { getString(R.string.hint_select) }
+        button(R.id.button_end_time).text=endTime.ifBlank { getString(R.string.hint_select) }
+    }
+    private fun updateColor() { button(R.id.button_select_color).apply { backgroundTintList=ColorStateList.valueOf(selectedColor); setTextColor(Ui.onColor(selectedColor)) } }
+    private fun chooseColor() {
+        val colors=intArrayOf(0xFF2456A6.toInt(),0xFF28704F.toInt(),0xFF76529C.toInt(),0xFFA84F17.toInt(),0xFFAC4263.toInt(),0xFF147C82.toInt(),0xFF526176.toInt(),0xFF8A6500.toInt())
+        val labels=intArrayOf(R.string.color_blue,R.string.color_green,R.string.color_purple,R.string.color_orange,R.string.color_rose,R.string.color_teal,R.string.color_slate,R.string.color_gold).map(::getString).toTypedArray()
+        MaterialAlertDialogBuilder(this).setTitle(R.string.choose_color).setSingleChoiceItems(labels,colors.indexOf(selectedColor)) { dialog,index -> selectedColor=colors[index]; updateColor(); dialog.dismiss() }.setNegativeButton(R.string.cancel,null).show()
+    }
+    private fun format(value:LocalTime)=value.format(DateTimeFormatter.ofPattern("HH:mm",Locale.ROOT))
+    private fun pickTime(value:String,onChosen:(String)->Unit) {
+        val current=runCatching { CourseRules.time(value) }.getOrElse { LocalTime.now() }
+        TimePickerDialog(this,{ _,hour,minute -> onChosen(format(LocalTime.of(hour,minute))) },current.hour,current.minute,true).show()
+    }
+    private fun fail(message:Int) { findViewById<TextView>(R.id.form_error).apply { setText(message); visibility=View.VISIBLE; announceForAccessibility(text) } }
+    private fun save() {
+        if(saving || !draftLoaded) return
+        val name=field(R.id.edittext_course_name).text.toString().trim()
+        if(name.isBlank()) { field(R.id.edittext_course_name).error=getString(R.string.name_required); return }
+        if(selectedDays().isEmpty()) { fail(R.string.days_required); return }
+        if(startTime.isBlank() || endTime.isBlank()) { fail(R.string.time_required); return }
+        if(runCatching { CourseRules.time(endTime)<=CourseRules.time(startTime) }.getOrDefault(true)) { fail(R.string.time_invalid); return }
+        findViewById<View>(R.id.form_error).visibility=View.GONE
+        val course=CourseEntity(if(courseId==-1) 0 else courseId,selectedDays(),startTime,endTime,name,field(R.id.edittext_course_location).text.toString(),field(R.id.edittext_course_description).text.toString(),selectedColor)
+        saving=true; button(R.id.button_submit).isEnabled=false
+        lifecycleScope.launch {
+            try { repository.save(course); NotificationUtils.refreshReminders(this@CourseActivity,lifecycleScope); finish() }
+            catch(e:Exception) { if(e is CancellationException) throw e; Ui.error(this@CourseActivity,e) }
+            finally { saving=false; button(R.id.button_submit).isEnabled=true }
         }
     }
-
-    private fun openColorPickerDialog() {
-        val colorPicker =
-            AmbilWarnaDialog(this, selectedColor, object : AmbilWarnaDialog.OnAmbilWarnaListener {
-                override fun onOk(dialog: AmbilWarnaDialog, color: Int) {
-                    selectedColor = color
-                    buttonSelectColor.setBackgroundColor(selectedColor)
-                }
-
-                override fun onCancel(dialog: AmbilWarnaDialog) {
-                    // do nothing
-                }
-            })
-        colorPicker.show()
-    }
-
-    private fun getSelectedWeekdays(): List<Int> {
-        val weekdays = mutableListOf<Int>()
-        if (checkboxMonday.isChecked) weekdays.add(1)   // Monday
-        if (checkboxTuesday.isChecked) weekdays.add(2)  // Tuesday
-        if (checkboxWednesday.isChecked) weekdays.add(3) // Wednesday
-        if (checkboxThursday.isChecked) weekdays.add(4) // Thursday
-        if (checkboxFriday.isChecked) weekdays.add(5)   // Friday
-        return weekdays
-    }
-
-    private fun checkElements(
-        weekdays: List<Int>,
-        startTime: String,
-        endTime: String,
-        courseName: String,
-        location: String,
-        description: String
-    ): Boolean {
-        if (weekdays.isEmpty()) {
-            Toast.makeText(this, "Please select at least one weekday", Toast.LENGTH_SHORT).show()
-            return false
-        }
-
-        if (startTime.isBlank() || endTime.isBlank()) {
-            Toast.makeText(this, "Please select start and end time", Toast.LENGTH_SHORT).show()
-            return false
-        }
-
-        if (!isEndTimeValid(startTime, endTime)) {
-            Toast.makeText(this, "End time must be later than start time", Toast.LENGTH_SHORT).show()
-            return false
-        }
-
-        if (courseName.isBlank()) {
-            Toast.makeText(this, "Please enter the course name", Toast.LENGTH_SHORT).show()
-            return false
-        }
-
-        if (location.isBlank()) {
-            Toast.makeText(this, "Please enter the location", Toast.LENGTH_SHORT).show()
-            return false
-        }
-
-        if (description.isBlank()) {
-            Toast.makeText(this, "Please enter the description", Toast.LENGTH_SHORT).show()
-            return false
-        }
-        return true
+    override fun onSaveInstanceState(out:Bundle) {
+        out.putString("draft_start",startTime); out.putString("draft_end",endTime); out.putInt("draft_color",selectedColor)
+        out.putBoolean("draft_loaded",draftLoaded); out.putString("draft_initial",initial)
+        super.onSaveInstanceState(out)
     }
 }

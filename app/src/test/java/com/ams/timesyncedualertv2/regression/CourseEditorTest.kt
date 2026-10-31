@@ -31,7 +31,7 @@ class CourseEditorTest {
         a.findViewById<Button>(R.id.button_submit).performClick()
         for (attempt in 0..300) {
             shadowOf(Looper.getMainLooper()).idle()
-            if (ShadowToast.getTextOfLatestToast() != null) break
+            if (ShadowToast.getTextOfLatestToast() != null || a.findViewById<android.view.View>(R.id.form_error).visibility==android.view.View.VISIBLE) break
             Thread.sleep(10)
         }
         val db=Room.databaseBuilder(ApplicationProvider.getApplicationContext<Context>(),AppDatabase::class.java,"courses.db").build()

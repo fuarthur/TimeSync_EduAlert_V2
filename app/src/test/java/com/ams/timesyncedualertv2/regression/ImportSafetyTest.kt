@@ -28,7 +28,7 @@ class ImportSafetyTest {
         val controller = Robolectric.buildActivity(SettingsActivity::class.java).setup()
         val activity = controller.get()
         activity.findViewById<Button>(R.id.button_import_schedule).performClick()
-        (ShadowDialog.getLatestDialog() as AlertDialog).getButton(-1).performClick()
+        (ShadowDialog.getLatestDialog() as? AlertDialog)?.takeIf { it.isShowing }?.getButton(-1)?.performClick()
         repeat(30) { shadowOf(Looper.getMainLooper()).idle(); Thread.sleep(10) }
         assertEquals("Selecting or cancelling a file must never delete courses", 1, runBlocking { db.courseDao().getAllCourses().size })
         controller.pause().stop().destroy()

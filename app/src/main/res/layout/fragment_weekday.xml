@@ -1,14 +1,8 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/courses_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"/>
-
-
-</LinearLayout>
+<?xml version='1.0' encoding='utf-8'?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent">
+    <androidx.recyclerview.widget.RecyclerView android:id="@+id/courses_recycler_view" android:layout_width="match_parent" android:layout_height="match_parent" android:paddingHorizontal="20dp" android:paddingTop="12dp" android:paddingBottom="104dp" android:clipToPadding="false" />
+    <LinearLayout android:id="@+id/empty_state" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_gravity="center" android:padding="32dp" android:orientation="vertical" android:gravity="center" android:visibility="gone">
+        <TextView android:id="@+id/empty_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="@string/empty_day" android:textAppearance="?attr/textAppearanceTitleLarge" />
+        <TextView android:id="@+id/empty_hint" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:gravity="center" android:text="@string/empty_day_hint" android:textAppearance="?attr/textAppearanceBodyLarge" android:textColor="?attr/colorOnSurfaceVariant" />
+    </LinearLayout>
+</FrameLayout>
