@@ -35,6 +35,7 @@ import java.util.Date
 class HomepageActivity:AppCompatActivity() {
     val searchQuery=MutableStateFlow("")
     private var allCourses=emptyList<CourseEntity>()
+    private var keyboardVisible=false
     private val details=registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val json=result.data?.getStringExtra("deleted_course")
         if(result.resultCode==RESULT_OK && json!=null) {
@@ -52,7 +53,13 @@ class HomepageActivity:AppCompatActivity() {
     override fun onCreate(savedInstanceState:Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_homepage)
-        Ui.setup(this)
+        Ui.setup(this,onInsets={ insets ->
+            keyboardVisible=insets.isVisible(androidx.core.view.WindowInsetsCompat.Type.ime())
+            renderNext()
+        })
+        findViewById<View>(R.id.root).addOnLayoutChangeListener { _,left,top,right,bottom,oldLeft,oldTop,oldRight,oldBottom ->
+            if(right-left!=oldRight-oldLeft || bottom-top!=oldBottom-oldTop) renderNext()
+        }
         val toolbar=findViewById<MaterialToolbar>(R.id.toolbar)
         toolbar.subtitle=DateFormat.getDateInstance(DateFormat.FULL).format(Date())
         toolbar.menu.add(0,1,0,R.string.settings).apply { setIcon(R.drawable.ic_settings); icon?.setTint(com.google.android.material.color.MaterialColors.getColor(toolbar,com.google.android.material.R.attr.colorOnSurface)); setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_ALWAYS) }
@@ -96,11 +103,20 @@ class HomepageActivity:AppCompatActivity() {
     private fun renderNext() {
         val card=findViewById<View>(R.id.next_course_card)
         val next=Timetable.next(allCourses,ZonedDateTime.now())
-        card.visibility=if(next==null) View.GONE else View.VISIBLE
+        val root=findViewById<View>(R.id.root)
+        val height=(root.height-root.paddingTop-root.paddingBottom)/resources.displayMetrics.density
+        findViewById<View>(R.id.toolbar).visibility=if(keyboardVisible && height<420) View.GONE else View.VISIBLE
+        findViewById<View>(R.id.tab_layout).visibility=if(keyboardVisible && height<300) View.GONE else View.VISIBLE
+        findViewById<View>(R.id.add_course_button).visibility=if(keyboardVisible) View.GONE else View.VISIBLE
+        card.visibility=if(next==null || keyboardVisible || height<520) View.GONE else View.VISIBLE
         if(next!=null) {
-            findViewById<TextView>(R.id.next_course_title).apply { text=getString(if(next.ongoing) R.string.ongoing_course else R.string.next_course,next.course.name); maxLines=2; ellipsize=android.text.TextUtils.TruncateAt.END }
+            val title=findViewById<TextView>(R.id.next_course_title)
+            val titleText=getString(if(next.ongoing) R.string.ongoing_course else R.string.next_course,next.course.name)
+            if(title.text.toString()!=titleText) title.text=titleText
             val date=next.start.format(DateTimeFormatter.ofPattern("EEE, MMM d",Locale.getDefault()))
-            findViewById<TextView>(R.id.next_course_info).text=date+"  "+getString(R.string.course_time_format,next.course.startTime,next.course.endTime)+next.course.location.takeIf { it.isNotBlank() }?.let { "\n$it" }.orEmpty()
+            val info=findViewById<TextView>(R.id.next_course_info)
+            val infoText=date+"  "+getString(R.string.course_time_format,next.course.startTime,next.course.endTime)+next.course.location.takeIf { it.isNotBlank() }?.let { "\n$it" }.orEmpty()
+            if(info.text.toString()!=infoText) info.text=infoText
             card.setOnClickListener { openCourse(next.course) }
         }
     }

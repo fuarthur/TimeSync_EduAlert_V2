@@ -3,9 +3,9 @@
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="18dp" android:orientation="vertical">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
             <View android:id="@+id/course_color_dot" android:layout_width="12dp" android:layout_height="12dp" android:layout_marginEnd="10dp" android:importantForAccessibility="no" />
-            <TextView android:id="@+id/textView_course_name" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textAppearance="?attr/textAppearanceTitleMedium" android:textSize="18sp" />
+            <TextView android:id="@+id/textView_course_name" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textAppearance="?attr/textAppearanceTitleMedium" android:textSize="18sp" android:maxLines="2" android:ellipsize="end" />
         </LinearLayout>
         <TextView android:id="@+id/textView_course_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:textAppearance="?attr/textAppearanceBodyLarge" android:textColor="?attr/colorPrimary" />
-        <TextView android:id="@+id/textView_course_location" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?attr/colorOnSurfaceVariant" />
+        <TextView android:id="@+id/textView_course_location" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?attr/colorOnSurfaceVariant" android:maxLines="2" android:ellipsize="end" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

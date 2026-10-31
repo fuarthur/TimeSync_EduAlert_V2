@@ -16,6 +16,8 @@ import com.ams.timesyncedualertv2.TimeSyncApplication
 import com.ams.timesyncedualertv2.model.CourseAdapter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import kotlinx.coroutines.flow.combine
 import com.ams.timesyncedualertv2.domain.Timetable
 
@@ -30,6 +32,18 @@ class WeekdayFragment:Fragment() {
         val title=view.findViewById<TextView>(R.id.empty_title)
         val hint=view.findViewById<TextView>(R.id.empty_hint)
         list.layoutManager=LinearLayoutManager(requireContext())
+        ViewCompat.setOnApplyWindowInsetsListener(list) { target,insets ->
+            val bottom=if(insets.isVisible(WindowInsetsCompat.Type.ime())) 16 else 104
+            target.setPadding(target.paddingLeft,target.paddingTop,target.paddingRight,(bottom*resources.displayMetrics.density).toInt())
+            insets
+        }
+        ViewCompat.requestApplyInsets(list)
+        view.addOnLayoutChangeListener { _,_,top,_,bottom,_,_,_,_ ->
+            val compact=(bottom-top)/resources.displayMetrics.density<200
+            hint.visibility=if(compact) View.GONE else View.VISIBLE
+            val padding=((if(compact) 12 else 32)*resources.displayMetrics.density).toInt()
+            empty.setPadding(padding,padding,padding,padding)
+        }
         empty.visibility=View.VISIBLE; title.setText(R.string.loading); hint.text=""
         val day=requireArguments().getInt("weekday")
         val home=requireActivity() as HomepageActivity

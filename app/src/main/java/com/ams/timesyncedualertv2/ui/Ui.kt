@@ -16,7 +16,7 @@ import com.google.android.material.snackbar.Snackbar
 
 object Ui {
     val dayNames=intArrayOf(R.string.monday_short,R.string.tuesday_short,R.string.wednesday_short,R.string.thursday_short,R.string.friday_short,R.string.saturday_short,R.string.sunday_short)
-    fun setup(a:AppCompatActivity,back:(()->Unit)?=null) {
+    fun setup(a:AppCompatActivity,onInsets:((WindowInsetsCompat)->Unit)?=null,back:(()->Unit)?=null) {
         val root=a.findViewById<View>(R.id.root)
         WindowCompat.setDecorFitsSystemWindows(a.window,false)
         val dark=(a.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK)==Configuration.UI_MODE_NIGHT_YES
@@ -25,6 +25,7 @@ object Ui {
             val bars=insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val ime=insets.getInsets(WindowInsetsCompat.Type.ime())
             view.setPadding(bars.left,bars.top,bars.right,maxOf(bars.bottom,ime.bottom))
+            onInsets?.invoke(insets)
             insets
         }
         ViewCompat.requestApplyInsets(root)
