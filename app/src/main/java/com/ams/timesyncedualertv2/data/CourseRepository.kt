@@ -19,7 +19,7 @@ class CourseRepository(private val db:AppDatabase) {
         if(valid.id!=0 && dao.getCourseById(valid.id)==null) throw CourseMissingException()
         val others=dao.getAllCourses().filter { it.id!=valid.id }
         others.firstOrNull { CourseRules.overlaps(it,valid) }?.let { throw CourseConflictException(it.name) }
-        if(valid.id==0) dao.insert(valid).toInt() else {
+        if(valid.id==0) insertWithId(valid.copy(id=freeId(others.map { it.id }.toSet()))) else {
             dao.update(valid)
             valid.id
         }
@@ -30,7 +30,11 @@ class CourseRepository(private val db:AppDatabase) {
         require(valid.size<=1000) { "Too many courses" }
         val ids=valid.map { it.id }.filter { it!=0 }
         require(ids.distinct().size==ids.size) { "Duplicate course IDs" }
-        db.withTransaction { dao.deleteAllCourses(); dao.insertAll(valid) }
+        val used=valid.map { it.id }.filter { it>0 }.toMutableSet()
+        val allocated=valid.map { course ->
+            if(course.id!=0) course else course.copy(id=freeId(used).also { used.add(it) })
+        }
+        db.withTransaction { dao.deleteAllCourses(); dao.insertAll(allocated) }
     }
 
     suspend fun delete(id:Int):CourseEntity? = db.withTransaction {
@@ -40,8 +44,23 @@ class CourseRepository(private val db:AppDatabase) {
         var valid=CourseRules.validate(course)
         val others=dao.getAllCourses()
         others.firstOrNull { CourseRules.overlaps(it,valid) }?.let { throw CourseConflictException(it.name) }
-        if(others.any { it.id==valid.id }) valid=valid.copy(id=0)
-        dao.insert(valid).toInt()
+        if(valid.id==0 || others.any { it.id==valid.id }) valid=valid.copy(id=freeId(others.map { it.id }.toSet()))
+        insertWithId(valid)
+    }
+    private fun freeId(used:Set<Int>):Int {
+        val maximum=used.maxOrNull() ?: 0
+        if(maximum<Int.MAX_VALUE) return maxOf(1,maximum+1)
+        var candidate=1
+        while(candidate in used) {
+            check(candidate<Int.MAX_VALUE) { "No course IDs available" }
+            candidate++
+        }
+        return candidate
+    }
+    private suspend fun insertWithId(course:CourseEntity):Int {
+        check(course.id>0)
+        check(dao.insert(course)==course.id.toLong()) { "Unexpected database ID" }
+        return course.id
     }
     suspend fun clear()=dao.deleteAllCourses()
 }

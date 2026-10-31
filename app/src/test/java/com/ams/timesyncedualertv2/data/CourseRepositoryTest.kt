@@ -35,4 +35,15 @@ class CourseRepositoryTest {
             assertEquals("Math",db.courseDao().getAllCourses().single().name)
         } finally { db.close() }
     }
+    @Test fun maximumImportedIdDoesNotOverflowNextSave()=runBlocking {
+        val db=Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(),AppDatabase::class.java).build()
+        try {
+            val repo=CourseRepository(db)
+            repo.replace(listOf(course().copy(id=Int.MAX_VALUE)))
+            val id=repo.save(course("11:00","12:00"))
+            assertTrue("Generated IDs must remain positive",id>0)
+            assertNotNull(repo.get(id))
+            assertTrue(repo.all().all { it.id>0 })
+        } finally { db.close() }
+    }
 }
