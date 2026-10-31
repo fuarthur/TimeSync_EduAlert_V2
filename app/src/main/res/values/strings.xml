@@ -1,14 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">TimeSync EduAlert V2</string>
-
-<string name="hint_select">Select</string>
-
-<string name="hint_back">Back</string>
-
-<string name="course_time_format">%1$s - %2$s</string>
-
-<string name="timetable">Timetable</string>
+    <string name="hint_select">Select</string>
+    <string name="hint_back">Back</string>
+    <string name="course_time_format">%1$s - %2$s</string>
+    <string name="timetable">Timetable</string>
     <string name="settings">Settings</string>
     <string name="add_course">Add course</string>
     <string name="edit_course">Edit course</string>
@@ -35,8 +31,7 @@
     <string name="undo">Undo</string>
     <string name="course_deleted">Course deleted</string>
     <string name="course_restored">Course restored</string>
-
-<string name="notifications">Course reminders</string>
+    <string name="notifications">Course reminders</string>
     <string name="notifications_description">A reminder before each class, on the days it repeats.</string>
     <string name="reminders_enabled">Enable course reminders</string>
     <string name="reminder_minutes">Minutes before class</string>
@@ -81,20 +76,17 @@
     <string name="search_courses">Search courses or rooms</string>
     <string name="next_course">Next: %1$s</string>
     <string name="ongoing_course">Now: %1$s</string>
-
-<string name="monday_short">Mon</string>
+    <string name="monday_short">Mon</string>
     <string name="tuesday_short">Tue</string>
     <string name="wednesday_short">Wed</string>
     <string name="thursday_short">Thu</string>
     <string name="friday_short">Fri</string>
     <string name="saturday_short">Sat</string>
     <string name="sunday_short">Sun</string>
-
-<string name="loading">Loading timetable…</string>
+    <string name="loading">Loading timetable…</string>
     <string name="retry">Try again</string>
     <string name="load_failed">Could not load the timetable.</string>
-
-<string name="color_blue">Blue</string>
+    <string name="color_blue">Blue</string>
     <string name="color_green">Green</string>
     <string name="color_purple">Purple</string>
     <string name="color_orange">Orange</string>
@@ -102,10 +94,11 @@
     <string name="color_teal">Teal</string>
     <string name="color_slate">Slate</string>
     <string name="color_gold">Gold</string>
-
-<string name="time_and_days">Time and days</string>
+    <string name="time_and_days">Time and days</string>
     <string name="permissions">Android permissions</string>
-
-<string name="deleted_restore_failed">Could not restore this course because its time is now occupied.</string>
-
-<string name="copy_name">%1$s (copy)</string><string name="duplicate_hint">Choose another time or day before saving this copy.</string></resources>
+    <string name="deleted_restore_failed">Could not restore this course because its time is now occupied.</string>
+    <string name="copy_name">%1$s (copy)</string>
+    <string name="duplicate_hint">Choose another time or day before saving this copy.</string>
+    <string name="course_schedule_format">%1$s\n%2$s</string>
+    <string name="integer_format" translatable="false">%1$d</string>
+</resources>

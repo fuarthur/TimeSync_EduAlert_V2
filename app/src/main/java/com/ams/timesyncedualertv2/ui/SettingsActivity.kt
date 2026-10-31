@@ -84,7 +84,10 @@ class SettingsActivity : AppCompatActivity() {
         }
         val minutes = findViewById<EditText>(R.id.edittext_time_before)
         minutes.inputType = InputType.TYPE_CLASS_NUMBER
-        if (state == null) minutes.setText(preferences.getInt("reminder_time", 10).toString())
+        if (state == null)
+            minutes.setText(
+                getString(R.string.integer_format, preferences.getInt("reminder_time", 10)),
+            )
         findViewById<Button>(R.id.button_submit).setOnClickListener {
             val value = minutes.text.toString().trim().toIntOrNull()
             if (value == null || value !in 1..1440)

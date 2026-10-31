@@ -28,8 +28,7 @@
     <string name="undo">撤销</string>
     <string name="course_deleted">课程已删除</string>
     <string name="course_restored">课程已恢复</string>
-
-<string name="notifications">上课提醒</string>
+    <string name="notifications">上课提醒</string>
     <string name="notifications_description">在课程重复的每一天，提前提醒你上课。</string>
     <string name="reminders_enabled">启用上课提醒</string>
     <string name="reminder_minutes">提前分钟数</string>
@@ -74,20 +73,17 @@
     <string name="search_courses">搜索课程或地点</string>
     <string name="next_course">下一节：%1$s</string>
     <string name="ongoing_course">正在上课：%1$s</string>
-
-<string name="monday_short">周一</string>
+    <string name="monday_short">周一</string>
     <string name="tuesday_short">周二</string>
     <string name="wednesday_short">周三</string>
     <string name="thursday_short">周四</string>
     <string name="friday_short">周五</string>
     <string name="saturday_short">周六</string>
     <string name="sunday_short">周日</string>
-
-<string name="loading">正在读取课表…</string>
+    <string name="loading">正在读取课表…</string>
     <string name="retry">重试</string>
     <string name="load_failed">无法读取课表。</string>
-
-<string name="color_blue">蓝色</string>
+    <string name="color_blue">蓝色</string>
     <string name="color_green">绿色</string>
     <string name="color_purple">紫色</string>
     <string name="color_orange">橙色</string>
@@ -95,16 +91,13 @@
     <string name="color_teal">青色</string>
     <string name="color_slate">灰蓝</string>
     <string name="color_gold">金色</string>
-
-<string name="time_and_days">时间与星期</string>
+    <string name="time_and_days">时间与星期</string>
     <string name="permissions">Android 权限</string>
-
-<string name="deleted_restore_failed">该时段已被占用，无法恢复此课程。</string>
-
-<string name="hint_select">选择</string>
-
-<string name="hint_back">返回</string>
-
-<string name="course_time_format">%1$s – %2$s</string>
-
-<string name="copy_name">%1$s（副本）</string><string name="duplicate_hint">保存副本前，请选择其他时间或星期。</string></resources>
+    <string name="deleted_restore_failed">该时段已被占用，无法恢复此课程。</string>
+    <string name="hint_select">选择</string>
+    <string name="hint_back">返回</string>
+    <string name="course_time_format">%1$s – %2$s</string>
+    <string name="copy_name">%1$s（副本）</string>
+    <string name="duplicate_hint">保存副本前，请选择其他时间或星期。</string>
+    <string name="course_schedule_format">%1$s\n%2$s</string>
+</resources>

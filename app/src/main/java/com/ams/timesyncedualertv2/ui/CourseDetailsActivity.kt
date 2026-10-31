@@ -58,11 +58,15 @@ class CourseDetailsActivity : AppCompatActivity() {
                     current = c
                     findViewById<TextView>(R.id.textView_course_name).text = c.name
                     findViewById<TextView>(R.id.textView_course_time).text =
-                        c.weekday
-                            .filter { it in 1..7 }
-                            .joinToString(", ") { getString(Ui.dayNames[it - 1]) } +
-                            "\n" +
-                            getString(R.string.course_time_format, c.startTime, c.endTime)
+                        getString(
+                            R.string.course_schedule_format,
+                            c.weekday
+                                .filter { it in 1..7 }
+                                .joinToString(", ") {
+                                    getString(Ui.dayNames[it - 1])
+                                },
+                            getString(R.string.course_time_format, c.startTime, c.endTime),
+                        )
                     findViewById<TextView>(R.id.textView_course_location).text =
                         c.location.ifBlank { getString(R.string.no_location) }
                     findViewById<TextView>(R.id.textView_course_description).text =
