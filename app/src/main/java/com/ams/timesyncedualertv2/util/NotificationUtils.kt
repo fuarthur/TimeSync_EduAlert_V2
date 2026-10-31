@@ -8,10 +8,11 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
+import androidx.core.net.toUri
 import com.ams.timesyncedualertv2.R
 import com.ams.timesyncedualertv2.db.AppDatabase
 import com.ams.timesyncedualertv2.domain.CourseRules
@@ -98,11 +99,10 @@ object NotificationUtils {
         }
         val keys = settings(context).getStringSet(KEYS, emptySet()).orEmpty().toMutableSet()
         keys.add("${course.id}/$day")
-        settings(context)
-            .edit()
-            .putStringSet(KEYS, keys)
-            .putLong("trigger_${course.id}/$day", trigger)
-            .apply()
+        settings(context).edit {
+            putStringSet(KEYS, keys)
+            putLong("trigger_${course.id}/$day", trigger)
+        }
     }
 
     private fun pending(context: Context, id: Int, day: Int, trigger: Long = -1L) =
@@ -110,7 +110,7 @@ object NotificationUtils {
             context,
             0,
             Intent(context, CourseReminderReceiver::class.java)
-                .setData(Uri.parse("timesync://course/$id/$day"))
+                .setData("timesync://course/$id/$day".toUri())
                 .putExtra("course_id", id)
                 .putExtra("weekday", day)
                 .putExtra("trigger_at", trigger),
@@ -126,19 +126,22 @@ object NotificationUtils {
     @Synchronized
     fun cancelCourseReminders(context: Context) {
         val alarm = context.getSystemService(AlarmManager::class.java)
-        val editor = settings(context).edit().remove(KEYS)
-        settings(context).getStringSet(KEYS, emptySet()).orEmpty().forEach { key ->
-            val parts = key.split("/")
-            val id = parts.getOrNull(0)?.toIntOrNull()
-            val day = parts.getOrNull(1)?.toIntOrNull()
-            if (id != null && day != null) {
-                val token = pending(context, id, day)
-                alarm.cancel(token)
-                token.cancel()
+        val preferences = settings(context)
+        val keys = preferences.getStringSet(KEYS, emptySet()).orEmpty()
+        preferences.edit {
+            remove(KEYS)
+            keys.forEach { key ->
+                val parts = key.split("/")
+                val id = parts.getOrNull(0)?.toIntOrNull()
+                val day = parts.getOrNull(1)?.toIntOrNull()
+                if (id != null && day != null) {
+                    val token = pending(context, id, day)
+                    alarm.cancel(token)
+                    token.cancel()
+                }
+                remove("trigger_$key")
             }
-            editor.remove("trigger_$key")
         }
-        editor.apply()
         context.getSystemService(NotificationManager::class.java).cancelAll()
     }
 

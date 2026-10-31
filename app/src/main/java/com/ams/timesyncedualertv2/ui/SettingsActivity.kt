@@ -15,6 +15,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.ams.timesyncedualertv2.R
 import com.ams.timesyncedualertv2.TimeSyncApplication
@@ -73,7 +75,7 @@ class SettingsActivity : AppCompatActivity() {
         val toggle = findViewById<MaterialSwitch>(R.id.switch_enable_notifications)
         toggle.isChecked = preferences.getBoolean("enable_notifications", true)
         toggle.setOnCheckedChangeListener { _, checked ->
-            preferences.edit().putBoolean("enable_notifications", checked).apply()
+            preferences.edit { putBoolean("enable_notifications", checked) }
             if (!checked) NotificationUtils.cancelCourseReminders(this)
             else if (
                 ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
@@ -94,7 +96,7 @@ class SettingsActivity : AppCompatActivity() {
                 minutes.error = getString(R.string.invalid_minutes)
             else {
                 minutes.error = null
-                preferences.edit().putInt("reminder_time", value).apply()
+                preferences.edit { putInt("reminder_time", value) }
                 NotificationUtils.refreshReminders(this, lifecycleScope)
                 Ui.message(this, R.string.reminder_saved)
             }
@@ -110,7 +112,7 @@ class SettingsActivity : AppCompatActivity() {
                 startActivity(
                     Intent(
                         Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
-                        Uri.parse("package:$packageName"),
+                        "package:$packageName".toUri(),
                     ),
                 )
             }
@@ -138,7 +140,7 @@ class SettingsActivity : AppCompatActivity() {
                     .show()
         }
         state?.getString("pending_import_uri")?.let {
-            findViewById<android.view.View>(R.id.root).post { readPreview(Uri.parse(it)) }
+            findViewById<android.view.View>(R.id.root).post { readPreview(it.toUri()) }
         }
     }
 
@@ -207,7 +209,9 @@ class SettingsActivity : AppCompatActivity() {
     private fun showPreview(courses: List<CourseEntity>) {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.import_title)
-            .setMessage(resources.getQuantityString(R.plurals.import_message, courses.size, courses.size))
+            .setMessage(
+                resources.getQuantityString(R.plurals.import_message, courses.size, courses.size),
+            )
             .setNegativeButton(R.string.cancel) { _, _ -> pendingUri = null }
             .setOnCancelListener { pendingUri = null }
             .setPositiveButton(R.string.replace) { _, _ ->
