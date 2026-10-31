@@ -15,11 +15,7 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments["room.schemaLocation"] = "$projectDir/schemas"
-            }
-        }
+
     }
 
     buildTypes {
@@ -48,7 +44,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.work.runtime.ktx)
     testImplementation(libs.junit)
     testImplementation("org.robolectric:robolectric:4.13")
     testImplementation("androidx.test:core:1.5.0")
@@ -56,9 +51,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.androidx.viewpager2)
-    implementation(libs.ambilwarna)
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation (libs.google.gson)
 }
+ksp { arg("room.schemaLocation", "$projectDir/schemas") }
