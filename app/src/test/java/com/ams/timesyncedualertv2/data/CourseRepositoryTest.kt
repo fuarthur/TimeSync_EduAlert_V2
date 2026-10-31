@@ -13,46 +13,120 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class CourseRepositoryTest {
-    private fun course(start:String="09:00",end:String="10:00")=CourseEntity(weekday=listOf(1),startTime=start,endTime=end,name="Math",location="Hall",description="",color=-65536)
-    @Test fun concurrentConflictingSavesOnlyInsertOnce() = runBlocking {
-        val db=Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(),AppDatabase::class.java).build()
+    private fun course(start: String = "09:00", end: String = "10:00") =
+        CourseEntity(
+            weekday = listOf(1),
+            startTime = start,
+            endTime = end,
+            name = "Math",
+            location = "Hall",
+            description = "",
+            color = -65536,
+        )
+
+    @Test
+    fun concurrentConflictingSavesOnlyInsertOnce() = runBlocking {
+        val db =
+            Room.inMemoryDatabaseBuilder(
+                    ApplicationProvider.getApplicationContext<Context>(),
+                    AppDatabase::class.java,
+                )
+                .build()
         try {
-            val repo=CourseRepository(db)
-            val results=coroutineScope { (1..2).map { async(Dispatchers.IO) { runCatching { repo.save(course()) } } }.awaitAll() }
-            assertEquals(1,results.count { it.isSuccess })
-            assertEquals(1,db.courseDao().getAllCourses().size)
-        } finally { db.close() }
+            val repo = CourseRepository(db)
+            val results = coroutineScope {
+                (1..2)
+                    .map { async(Dispatchers.IO) { runCatching { repo.save(course()) } } }
+                    .awaitAll()
+            }
+            assertEquals(1, results.count { it.isSuccess })
+            assertEquals(1, db.courseDao().getAllCourses().size)
+        } finally {
+            db.close()
+        }
     }
-    @Test fun adjacentCoursesDoNotConflict()=runBlocking {
-        val db=Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(),AppDatabase::class.java).build()
-        try { val repo=CourseRepository(db); repo.save(course()); repo.save(course("10:00","11:00")); assertEquals(2,db.courseDao().getAllCourses().size) } finally { db.close() }
-    }
-    @Test fun failedReplacementRetainsOldCourses()=runBlocking {
-        val db=Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(),AppDatabase::class.java).build()
+
+    @Test
+    fun adjacentCoursesDoNotConflict() = runBlocking {
+        val db =
+            Room.inMemoryDatabaseBuilder(
+                    ApplicationProvider.getApplicationContext<Context>(),
+                    AppDatabase::class.java,
+                )
+                .build()
         try {
-            val repo=CourseRepository(db); repo.save(course())
-            assertTrue(runCatching { repo.replace(listOf(course().copy(weekday=emptyList()))) }.isFailure)
-            assertEquals("Math",db.courseDao().getAllCourses().single().name)
-        } finally { db.close() }
+            val repo = CourseRepository(db)
+            repo.save(course())
+            repo.save(course("10:00", "11:00"))
+            assertEquals(2, db.courseDao().getAllCourses().size)
+        } finally {
+            db.close()
+        }
     }
-    @Test fun maximumImportedIdDoesNotOverflowNextSave()=runBlocking {
-        val db=Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(),AppDatabase::class.java).build()
+
+    @Test
+    fun failedReplacementRetainsOldCourses() = runBlocking {
+        val db =
+            Room.inMemoryDatabaseBuilder(
+                    ApplicationProvider.getApplicationContext<Context>(),
+                    AppDatabase::class.java,
+                )
+                .build()
         try {
-            val repo=CourseRepository(db)
-            repo.replace(listOf(course().copy(id=Int.MAX_VALUE)))
-            val id=repo.save(course("11:00","12:00"))
-            assertTrue("Generated IDs must remain positive",id>0)
+            val repo = CourseRepository(db)
+            repo.save(course())
+            assertTrue(
+                runCatching { repo.replace(listOf(course().copy(weekday = emptyList()))) }
+                    .isFailure,
+            )
+            assertEquals("Math", db.courseDao().getAllCourses().single().name)
+        } finally {
+            db.close()
+        }
+    }
+
+    @Test
+    fun maximumImportedIdDoesNotOverflowNextSave() = runBlocking {
+        val db =
+            Room.inMemoryDatabaseBuilder(
+                    ApplicationProvider.getApplicationContext<Context>(),
+                    AppDatabase::class.java,
+                )
+                .build()
+        try {
+            val repo = CourseRepository(db)
+            repo.replace(listOf(course().copy(id = Int.MAX_VALUE)))
+            val id = repo.save(course("11:00", "12:00"))
+            assertTrue("Generated IDs must remain positive", id > 0)
             assertNotNull(repo.get(id))
-            assertTrue(repo.all().all { it.id>0 })
-        } finally { db.close() }
+            assertTrue(repo.all().all { it.id > 0 })
+        } finally {
+            db.close()
+        }
     }
-    @Test fun overlappingReplacementRetainsExistingTimetable()=runBlocking {
-        val db=Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(),AppDatabase::class.java).build()
+
+    @Test
+    fun overlappingReplacementRetainsExistingTimetable() = runBlocking {
+        val db =
+            Room.inMemoryDatabaseBuilder(
+                    ApplicationProvider.getApplicationContext<Context>(),
+                    AppDatabase::class.java,
+                )
+                .build()
         try {
-            val repo=CourseRepository(db); val id=repo.save(course())
-            assertTrue(repo.runCatching { replace(listOf(course("11:00","12:00"),course("11:30","12:30"))) }.isFailure)
-            assertEquals(listOf(id),repo.all().map { it.id })
-            assertEquals("09:00",repo.all().single().startTime)
-        } finally { db.close() }
+            val repo = CourseRepository(db)
+            val id = repo.save(course())
+            assertTrue(
+                repo
+                    .runCatching {
+                        replace(listOf(course("11:00", "12:00"), course("11:30", "12:30")))
+                    }
+                    .isFailure,
+            )
+            assertEquals(listOf(id), repo.all().map { it.id })
+            assertEquals("09:00", repo.all().single().startTime)
+        } finally {
+            db.close()
+        }
     }
 }

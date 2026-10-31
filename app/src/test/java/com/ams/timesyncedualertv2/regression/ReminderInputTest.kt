@@ -12,11 +12,15 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class ReminderInputTest {
-    @Test fun overflowingMinutesAreRejectedWithoutCrashOrPreferenceChange() {
-        val c=Robolectric.buildActivity(SettingsActivity::class.java).setup()
+    @Test
+    fun overflowingMinutesAreRejectedWithoutCrashOrPreferenceChange() {
+        val c = Robolectric.buildActivity(SettingsActivity::class.java).setup()
         c.get().findViewById<EditText>(R.id.edittext_time_before).setText("9999999999")
         c.get().findViewById<Button>(R.id.button_submit).performClick()
-        assertEquals(10,c.get().getSharedPreferences("user_settings",0).getInt("reminder_time",10))
+        assertEquals(
+            10,
+            c.get().getSharedPreferences("user_settings", 0).getInt("reminder_time", 10),
+        )
         c.pause().stop().destroy()
     }
 }

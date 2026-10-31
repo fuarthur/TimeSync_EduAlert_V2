@@ -13,15 +13,34 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class UndoCourseTest {
-    @Test fun deletedCourseCanBeRestoredWithItsDetails()=runBlocking {
-        val db=Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(),AppDatabase::class.java).build()
+    @Test
+    fun deletedCourseCanBeRestoredWithItsDetails() = runBlocking {
+        val db =
+            Room.inMemoryDatabaseBuilder(
+                    ApplicationProvider.getApplicationContext<Context>(),
+                    AppDatabase::class.java,
+                )
+                .build()
         try {
-            val repo=CourseRepository(db)
-            val id=repo.save(CourseEntity(weekday=listOf(6),startTime="09:00",endTime="10:00",name="Art",location="Studio",description="Bring sketchbook",color=-65536))
-            val deleted=repo.delete(id)!!
+            val repo = CourseRepository(db)
+            val id =
+                repo.save(
+                    CourseEntity(
+                        weekday = listOf(6),
+                        startTime = "09:00",
+                        endTime = "10:00",
+                        name = "Art",
+                        location = "Studio",
+                        description = "Bring sketchbook",
+                        color = -65536,
+                    ),
+                )
+            val deleted = repo.delete(id)!!
             assertTrue(repo.all().isEmpty())
             repo.restore(deleted)
-            assertEquals(deleted,repo.all().single())
-        } finally { db.close() }
+            assertEquals(deleted, repo.all().single())
+        } finally {
+            db.close()
+        }
     }
 }

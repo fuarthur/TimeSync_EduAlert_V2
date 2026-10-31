@@ -21,21 +21,45 @@ import org.robolectric.shadows.ShadowToast
 
 @RunWith(RobolectricTestRunner::class)
 class CourseEditorTest {
-    @Test fun submitRejectsZeroLengthCourse() {
-        val controller=Robolectric.buildActivity(CourseActivity::class.java).setup()
-        val a=controller.get()
-        a.findViewById<CheckBox>(R.id.checkbox_monday).isChecked=true
-        for (id in listOf(R.id.edittext_course_name,R.id.edittext_course_location,R.id.edittext_course_description)) a.findViewById<EditText>(id).setText("Demo")
+    @Test
+    fun submitRejectsZeroLengthCourse() {
+        val controller = Robolectric.buildActivity(CourseActivity::class.java).setup()
+        val a = controller.get()
+        a.findViewById<CheckBox>(R.id.checkbox_monday).isChecked = true
+        for (id in
+            listOf(
+                R.id.edittext_course_name,
+                R.id.edittext_course_location,
+                R.id.edittext_course_description,
+            )) a.findViewById<EditText>(id).setText("Demo")
         // This is the exact state produced by selecting only a start time.
-        for (name in listOf("startTime","endTime")) CourseActivity::class.java.getDeclaredField(name).apply { isAccessible=true; set(a,"09:00") }
+        for (name in listOf("startTime", "endTime")) CourseActivity::class
+            .java
+            .getDeclaredField(name)
+            .apply {
+                isAccessible = true
+                set(a, "09:00")
+            }
         a.findViewById<Button>(R.id.button_submit).performClick()
         for (attempt in 0..300) {
             shadowOf(Looper.getMainLooper()).idle()
-            if (ShadowToast.getTextOfLatestToast() != null || a.findViewById<android.view.View>(R.id.form_error).visibility==android.view.View.VISIBLE) break
+            if (
+                ShadowToast.getTextOfLatestToast() != null ||
+                    a.findViewById<android.view.View>(R.id.form_error).visibility ==
+                        android.view.View.VISIBLE
+            )
+                break
             Thread.sleep(10)
         }
-        val db=Room.databaseBuilder(ApplicationProvider.getApplicationContext<Context>(),AppDatabase::class.java,"courses.db").build()
-        assertEquals(0,runBlocking { db.courseDao().getAllCourses().size })
-        controller.pause().stop().destroy(); db.close()
+        val db =
+            Room.databaseBuilder(
+                    ApplicationProvider.getApplicationContext<Context>(),
+                    AppDatabase::class.java,
+                    "courses.db",
+                )
+                .build()
+        assertEquals(0, runBlocking { db.courseDao().getAllCourses().size })
+        controller.pause().stop().destroy()
+        db.close()
     }
 }

@@ -12,5 +12,5 @@ data class CourseEntity(
     val name: String,
     val location: String,
     val description: String,
-    val color: Int
+    val color: Int,
 )

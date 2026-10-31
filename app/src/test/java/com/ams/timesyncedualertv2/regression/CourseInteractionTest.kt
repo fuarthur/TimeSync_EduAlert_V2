@@ -13,16 +13,21 @@ import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
 class CourseInteractionTest {
-    @Test fun oneTapOpensCourseDetails() {
-        val controller=Robolectric.buildActivity(HomepageActivity::class.java).setup()
-        val activity=controller.get()
-        val adapter=CourseAdapter(activity,listOf(CourseEntity(1,listOf(1),"09:00","10:00","Math","Hall","",-65536)))
-        val holder=adapter.onCreateViewHolder(FrameLayout(activity),0)
-        adapter.onBindViewHolder(holder,0)
+    @Test
+    fun oneTapOpensCourseDetails() {
+        val controller = Robolectric.buildActivity(HomepageActivity::class.java).setup()
+        val activity = controller.get()
+        val adapter =
+            CourseAdapter(
+                activity,
+                listOf(CourseEntity(1, listOf(1), "09:00", "10:00", "Math", "Hall", "", -65536)),
+            )
+        val holder = adapter.onCreateViewHolder(FrameLayout(activity), 0)
+        adapter.onBindViewHolder(holder, 0)
         holder.itemView.performClick()
-        val intent=shadowOf(activity).nextStartedActivity
-        assertNotNull("A single tap must open details",intent)
-        assertEquals(1,intent.getIntExtra("course_id",-1))
+        val intent = shadowOf(activity).nextStartedActivity
+        assertNotNull("A single tap must open details", intent)
+        assertEquals(1, intent.getIntExtra("course_id", -1))
         controller.pause().stop().destroy()
     }
 }

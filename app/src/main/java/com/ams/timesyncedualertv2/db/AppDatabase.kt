@@ -13,5 +13,6 @@ abstract class AppDatabase : RoomDatabase() {
         fun getInstance(context: android.content.Context): AppDatabase =
             (context.applicationContext as com.ams.timesyncedualertv2.TimeSyncApplication).database
     }
+
     abstract fun courseDao(): CourseDao
 }
