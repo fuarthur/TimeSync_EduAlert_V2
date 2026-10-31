@@ -1,6 +1,6 @@
 # Final independent review
 
-Review range: 73374cd..f00a02f. Read-only reviewer found no critical issue and six important edge cases. Each is being corrected in its own follow-up commit:
+Review range: 73374cd..f00a02f. Read-only reviewer found no critical issue and six important edge cases. Each was corrected in its own follow-up commit:
 
 - [x] DST ongoing state must use the declared local end time, rather than elapsed duration.
 - [x] Imported maximum Int IDs must not wrap the next generated course ID.
@@ -27,3 +27,5 @@ Notification routing: both the notification PendingIntent target and Home result
 Layout regression: the long-location landscape test failed with a collapsed pager before the fix. Bounded text, adaptive summary visibility and IME-aware list spacing passed all 7 native tests; all 39 local tests and Lint also passed. Test interactions wait for visible controls and asynchronous list updates.
 
 Minor date follow-up: the toolbar date is refreshed on resume/periodic render and only assigned when changed. No important findings remain unaddressed.
+
+Final verification at code commit 3f0fca3: 39 local tests and 7 native tests passed, Debug APK built, Lint reported 0 errors / 112 warnings. A fresh tracked-only archive on JDK 17 passed all 53 build/test/lint tasks. Manual captures cover light/dark, English/Chinese, font scale 1.3 and a wide screen. The final accessibility and selected-weekday fixes are separately committed. See VERIFICATION.md and CHANGES.md.

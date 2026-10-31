@@ -35,7 +35,7 @@
 - [x] 13. Seven-day timetable, next-class summary and search. Unit boundary fixtures and device filters.
 - [x] 14. Duplicate course and delete undo. Device duplicate draft + restore.
 - [x] 15. Versioned backup preview/export, limits and legacy roundtrip. Unit/device replacement roundtrip.
-- [ ] 16. Final independent review, targeted repairs, build/lint/device suite, screenshots and commit-to-issue changelog.
+- [x] 16. Final independent review, targeted repairs, build/lint/device suite, screenshots and commit-to-issue changelog.
 
 ## Progress
 Execution notes and test evidence are recorded in docs/IMPLEMENTATION.md. All issue fixes remain independently identifiable even when later refactors replace their implementation.
