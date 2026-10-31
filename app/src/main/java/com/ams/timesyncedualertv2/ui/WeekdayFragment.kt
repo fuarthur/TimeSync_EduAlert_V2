@@ -16,10 +16,12 @@ import com.ams.timesyncedualertv2.TimeSyncApplication
 import com.ams.timesyncedualertv2.model.CourseAdapter
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.combine
+import com.ams.timesyncedualertv2.domain.Timetable
 
 class WeekdayFragment:Fragment() {
     companion object {
-        fun newInstance(weekday:String)=WeekdayFragment().apply { arguments=Bundle().apply { putString("weekday",weekday) } }
+        fun newInstance(weekday:Int)=WeekdayFragment().apply { require(weekday in 1..7); arguments=Bundle().apply { putInt("weekday",weekday) } }
     }
     override fun onCreateView(inflater:LayoutInflater,parent:ViewGroup?,state:Bundle?):View=inflater.inflate(R.layout.fragment_weekday,parent,false)
     override fun onViewCreated(view:View,state:Bundle?) {
@@ -29,14 +31,17 @@ class WeekdayFragment:Fragment() {
         val hint=view.findViewById<TextView>(R.id.empty_hint)
         list.layoutManager=LinearLayoutManager(requireContext())
         empty.visibility=View.VISIBLE; title.setText(R.string.loading); hint.text=""
-        val day=listOf("Mon.","Tue.","Wed.","Thu.","Fri.").indexOf(arguments?.getString("weekday"))+1
+        val day=requireArguments().getInt("weekday")
+        val home=requireActivity() as HomepageActivity
+        val adapter=CourseAdapter(requireContext(),emptyList()) { home.openCourse(it) }
+        list.adapter=adapter
         viewLifecycleOwner.lifecycleScope.launch { viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             try {
-                (requireActivity().application as TimeSyncApplication).repository.courses.collect { all ->
-                    val courses=all.filter { day in it.weekday }
-                    list.adapter=CourseAdapter(requireContext(),courses)
+                combine((requireActivity().application as TimeSyncApplication).repository.courses,home.searchQuery) { all,query -> Timetable.onDay(all,day,query) }.collect { courses ->
+                    adapter.updateCourses(courses)
                     empty.visibility=if(courses.isEmpty()) View.VISIBLE else View.GONE
-                    title.setText(R.string.empty_day); hint.setText(R.string.empty_day_hint)
+                    val searching=home.searchQuery.value.isNotBlank()
+                    title.setText(if(searching) R.string.empty_search else R.string.empty_day); hint.setText(if(searching) R.string.empty_search_hint else R.string.empty_day_hint)
                 }
             } catch(e:Exception) {
                 if(e is CancellationException) throw e

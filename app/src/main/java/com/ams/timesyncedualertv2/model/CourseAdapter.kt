@@ -8,11 +8,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.DiffUtil
 import com.ams.timesyncedualertv2.R
 import com.ams.timesyncedualertv2.ui.CourseDetailsActivity
 
-class CourseAdapter(private val context:Context,courses:List<CourseEntity>,private val onOpen:((CourseEntity)->Unit)?=null):RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
-    private val sortedCourses=courses.sortedWith(compareBy<CourseEntity> { it.startTime }.thenBy { it.id })
+class CourseAdapter(private val context:Context,courses:List<CourseEntity>,private val onOpen:((CourseEntity)->Unit)?=null):ListAdapter<CourseEntity,CourseAdapter.CourseViewHolder>(object:DiffUtil.ItemCallback<CourseEntity>() {
+    override fun areItemsTheSame(old:CourseEntity,new:CourseEntity)=old.id==new.id
+    override fun areContentsTheSame(old:CourseEntity,new:CourseEntity)=old==new
+}) {
+    init { updateCourses(courses) }
+    fun updateCourses(courses:List<CourseEntity>) { submitList(courses.sortedWith(compareBy<CourseEntity> { it.startTime }.thenBy { it.id })) }
     class CourseViewHolder(view:View):RecyclerView.ViewHolder(view) {
         val nameTextView:TextView=view.findViewById(R.id.textView_course_name)
         val locationTextView:TextView=view.findViewById(R.id.textView_course_location)
@@ -20,9 +26,8 @@ class CourseAdapter(private val context:Context,courses:List<CourseEntity>,priva
         val dot:View=view.findViewById(R.id.course_color_dot)
     }
     override fun onCreateViewHolder(parent:ViewGroup,type:Int)=CourseViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_course,parent,false))
-    override fun getItemCount()=sortedCourses.size
     override fun onBindViewHolder(holder:CourseViewHolder,position:Int) {
-        val c=sortedCourses[position]
+        val c=getItem(position)
         holder.nameTextView.text=c.name
         holder.locationTextView.text=c.location.ifBlank { context.getString(R.string.no_location) }
         holder.timeTextView.text=context.getString(R.string.course_time_format,c.startTime,c.endTime)

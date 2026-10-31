@@ -26,7 +26,7 @@ class LiveScheduleTest {
         val controller=Robolectric.buildActivity(HomepageActivity::class.java).setup()
         val activity=controller.get()
         activity.findViewById<androidx.viewpager2.widget.ViewPager2>(R.id.pager).setCurrentItem(0,false)
-        fun list():RecyclerView?=activity.supportFragmentManager.fragments.filterIsInstance<WeekdayFragment>().firstOrNull { it.arguments?.getString("weekday")=="Mon." }?.view?.findViewById(R.id.courses_recycler_view)
+        fun list():RecyclerView?=activity.supportFragmentManager.fragments.filterIsInstance<WeekdayFragment>().firstOrNull { it.arguments?.getInt("weekday")==1 }?.view?.findViewById(R.id.courses_recycler_view)
         for (i in 0..300) { shadowOf(Looper.getMainLooper()).idle(); if(list()?.adapter?.itemCount==1) break; Thread.sleep(10) }
         assertEquals(1,list()?.adapter?.itemCount)
         runBlocking { db.courseDao().deleteAllCourses() }

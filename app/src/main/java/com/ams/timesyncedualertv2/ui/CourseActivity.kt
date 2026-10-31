@@ -35,7 +35,7 @@ class CourseActivity:AppCompatActivity() {
     private var initial=""
     private var saving=false
     private val repository get()=(application as TimeSyncApplication).repository
-    private val days get()=listOf(R.id.checkbox_monday,R.id.checkbox_tuesday,R.id.checkbox_wednesday,R.id.checkbox_thursday,R.id.checkbox_friday)
+    private val days get()=listOf(R.id.checkbox_monday,R.id.checkbox_tuesday,R.id.checkbox_wednesday,R.id.checkbox_thursday,R.id.checkbox_friday,R.id.checkbox_saturday,R.id.checkbox_sunday)
     private fun field(id:Int)=findViewById<EditText>(id)
     private fun button(id:Int)=findViewById<Button>(id)
     private fun signature()=listOf(startTime,endTime,selectedColor.toString(),field(R.id.edittext_course_name).text.toString(),field(R.id.edittext_course_location).text.toString(),field(R.id.edittext_course_description).text.toString(),selectedDays().joinToString()).joinToString("\u0001")
@@ -47,6 +47,8 @@ class CourseActivity:AppCompatActivity() {
         courseId=intent.getIntExtra("course_id",-1)
         findViewById<MaterialToolbar>(R.id.toolbar).setTitle(if(courseId==-1) R.string.add_course else R.string.edit_course)
         field(R.id.edittext_course_description).inputType=InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+        field(R.id.edittext_course_description).minLines=3
+        field(R.id.edittext_course_description).maxLines=6
         draftLoaded=state?.getBoolean("draft_loaded") ?: (courseId==-1)
         if(state!=null) {
             startTime=state.getString("draft_start",""); endTime=state.getString("draft_end","")
