@@ -241,7 +241,6 @@ class CourseActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.form_error).apply {
             setText(message)
             visibility = View.VISIBLE
-            announceForAccessibility(text)
         }
     }
 
