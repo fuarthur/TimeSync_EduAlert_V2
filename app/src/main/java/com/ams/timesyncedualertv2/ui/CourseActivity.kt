@@ -26,6 +26,7 @@ class CourseActivity : AppCompatActivity() {
     private var endTime: String = ""
     private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     private var courseId: Int = -1
+    private var draftLoaded = false
 
     private val checkboxMonday by lazy { findViewById<CheckBox>(R.id.checkbox_monday) }
     private val checkboxTuesday by lazy { findViewById<CheckBox>(R.id.checkbox_tuesday) }
@@ -56,7 +57,15 @@ class CourseActivity : AppCompatActivity() {
 
         courseId = intent.getIntExtra("course_id", -1)
 
-        if (courseId != -1) {
+        draftLoaded = savedInstanceState?.getBoolean("draft_loaded") ?: (courseId == -1)
+        if (savedInstanceState != null) {
+            startTime = savedInstanceState.getString("draft_start", "")
+            endTime = savedInstanceState.getString("draft_end", "")
+            selectedColor = savedInstanceState.getInt("draft_color", Color.RED)
+            if (startTime.isNotEmpty()) buttonSelectStartTime.text = startTime
+            if (endTime.isNotEmpty()) buttonSelectEndTime.text = endTime
+        }
+        if (courseId != -1 && !draftLoaded) {
             // 编辑课程，预填充课程信息
             lifecycleScope.launch {
                 val course = courseDao.getCourseById(courseId)
@@ -210,6 +219,14 @@ class CourseActivity : AppCompatActivity() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString("draft_start", startTime)
+        outState.putString("draft_end", endTime)
+        outState.putInt("draft_color", selectedColor)
+        outState.putBoolean("draft_loaded", draftLoaded)
+        super.onSaveInstanceState(outState)
+    }
+
     private fun fillCourseDetails(course: CourseEntity) {
         editTextCourseName.setText(course.name)
         editTextLocation.setText(course.location)
@@ -220,6 +237,7 @@ class CourseActivity : AppCompatActivity() {
         buttonSelectColor.setBackgroundColor(selectedColor)
         startTime = course.startTime
         endTime = course.endTime
+        draftLoaded = true
 
         course.weekday.forEach {
             when (it) {
