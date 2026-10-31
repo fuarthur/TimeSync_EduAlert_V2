@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
+import androidx.room.withTransaction
 import com.ams.timesyncedualertv2.R
 import com.ams.timesyncedualertv2.db.AppDatabase
 import com.ams.timesyncedualertv2.db.CourseDao
@@ -114,18 +115,7 @@ class SettingsActivity : AppCompatActivity() {
                 .setTitle("Confirm Import")
                 .setMessage("Import schedule will overwrite all existing schedules. Are you sure you want to continue?")
                 .setPositiveButton("Yes") { dialog, _ ->
-                    // 用户确认，执行删除操作
-                    lifecycleScope.launch {
-                        courseDao.deleteAllCourses()
-                        runOnUiThread {
-                            Toast.makeText(
-                                this@SettingsActivity,
-                                "All schedules have been deleted.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            openFilePickerForImport()
-                        }
-                    }
+                    openFilePickerForImport()
                     dialog.dismiss() // 关闭对话框
                 }
                 .setNegativeButton("No") { dialog, _ ->
@@ -233,7 +223,10 @@ class SettingsActivity : AppCompatActivity() {
                         AppDatabase::class.java, "courses.db"
                     ).build()
                     val courseDao = db.courseDao()
-                    courseDao.insertAll(importedCourses)
+                    db.withTransaction {
+                        courseDao.deleteAllCourses()
+                        courseDao.insertAll(importedCourses)
+                    }
 
                     runOnUiThread {
                         Toast.makeText(
