@@ -2,16 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical">
     <com.google.android.material.appbar.MaterialToolbar android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="wrap_content" app:title="@string/course_details" app:navigationIcon="@drawable/ic_back" app:navigationIconTint="?attr/colorOnSurface" />
     <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
-        <FrameLayout android:layout_width="match_parent" android:layout_height="wrap_content">
-            <LinearLayout android:id="@+id/main_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:orientation="vertical" android:padding="20dp">
-                <TextView android:id="@+id/textView_course_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp" android:textAppearance="?attr/textAppearanceHeadlineMedium" />
-                <TextView android:id="@+id/textView_course_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp" android:textAppearance="?attr/textAppearanceTitleLarge" />
-                <TextView android:id="@+id/textView_course_location" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <TextView android:id="@+id/textView_course_description" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp" android:textAppearance="?attr/textAppearanceBodyLarge" />
-                <com.google.android.material.button.MaterialButton android:id="@+id/button_edit_course" style="?attr/materialButtonStyle" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:text="@string/edit" />
-                <com.google.android.material.button.MaterialButton android:id="@+id/button_duplicate_course" style="?attr/materialButtonOutlinedStyle" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:text="@string/duplicate" android:visibility="gone" />
-                <com.google.android.material.button.MaterialButton android:id="@+id/button_delete_course" style="@style/Widget.Material3.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:text="@string/delete_course" android:textColor="?attr/colorError" />
-            </LinearLayout>
-        </FrameLayout>
+        <LinearLayout android:id="@+id/main_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:orientation="vertical" android:padding="20dp">
+            <TextView android:id="@+id/textView_course_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp" android:textAppearance="?attr/textAppearanceHeadlineMedium" />
+            <TextView android:id="@+id/textView_course_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp" android:textAppearance="?attr/textAppearanceTitleLarge" />
+            <TextView android:id="@+id/textView_course_location" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp" android:textAppearance="?attr/textAppearanceBodyLarge" />
+            <TextView android:id="@+id/textView_course_description" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16dp" android:textAppearance="?attr/textAppearanceBodyLarge" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/button_edit_course" style="?attr/materialButtonStyle" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:text="@string/edit" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/button_duplicate_course" style="?attr/materialButtonOutlinedStyle" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:text="@string/duplicate" android:visibility="gone" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/button_delete_course" style="@style/Widget.Material3.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:text="@string/delete_course" android:textColor="?attr/colorError" />
+        </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>
