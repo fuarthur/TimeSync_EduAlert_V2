@@ -42,7 +42,7 @@ class SettingsActivity:AppCompatActivity() {
         try { contentResolver.takePersistableUriPermission(uri,Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch(_:SecurityException) { }
         readPreview(uri)
     } }
-    private val exporter=registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri -> if(uri!=null) launchBackup { backup.write(uri); Ui.message(this,R.string.exported) } }
+    private val exporter=registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri -> if(uri!=null) launchBackup(R.string.export_failed) { backup.write(uri); Ui.message(this,R.string.exported) } }
 
     override fun onCreate(state:Bundle?) {
         super.onCreate(state)
@@ -85,12 +85,12 @@ class SettingsActivity:AppCompatActivity() {
         findViewById<TextView>(R.id.timing_status).setText(if(exact) R.string.timing_exact else R.string.timing_approximate)
         findViewById<Button>(R.id.timing_permission_button).isEnabled=!exact
     }
-    private fun launchBackup(action:suspend ()->Unit) {
+    private fun launchBackup(errorMessage:Int=R.string.operation_failed,action:suspend ()->Unit) {
         if(busy) return
         busy=true; backupButtons(false)
         lifecycleScope.launch {
             try { action() }
-            catch(e:Exception) { if(e is CancellationException) throw e; Ui.message(this@SettingsActivity,R.string.operation_failed) }
+            catch(e:Exception) { if(e is CancellationException) throw e; Ui.message(this@SettingsActivity,errorMessage) }
             finally { busy=false; backupButtons(true) }
         }
     }
@@ -107,7 +107,7 @@ class SettingsActivity:AppCompatActivity() {
     private fun showPreview(courses:List<CourseEntity>) {
         MaterialAlertDialogBuilder(this).setTitle(R.string.import_title).setMessage(getString(R.string.import_message,courses.size))
             .setNegativeButton(R.string.cancel) { _,_->pendingUri=null }.setOnCancelListener { pendingUri=null }
-            .setPositiveButton(R.string.replace) { _,_->pendingUri=null; launchBackup { repository.replace(courses); NotificationUtils.refreshReminders(this,lifecycleScope); Ui.message(this,R.string.imported) } }.show()
+            .setPositiveButton(R.string.replace) { _,_->pendingUri=null; launchBackup(R.string.import_failed) { repository.replace(courses); NotificationUtils.refreshReminders(this,lifecycleScope); Ui.message(this,R.string.imported) } }.show()
     }
     override fun onSaveInstanceState(out:Bundle) { out.putString("pending_import_uri",pendingUri); super.onSaveInstanceState(out) }
 }

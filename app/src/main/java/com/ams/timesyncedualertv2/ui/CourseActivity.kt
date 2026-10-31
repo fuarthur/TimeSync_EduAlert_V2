@@ -120,7 +120,7 @@ class CourseActivity:AppCompatActivity() {
     private fun save() {
         if(saving || !draftLoaded) return
         val name=field(R.id.edittext_course_name).text.toString().trim()
-        if(name.isBlank()) { field(R.id.edittext_course_name).error=getString(R.string.name_required); return }
+        if(name.isBlank()) { field(R.id.edittext_course_name).apply { error=getString(R.string.name_required); requestFocus(); requestRectangleOnScreen(android.graphics.Rect(0,0,width,height),true) }; return }
         if(selectedDays().isEmpty()) { fail(R.string.days_required); return }
         if(startTime.isBlank() || endTime.isBlank()) { fail(R.string.time_required); return }
         if(runCatching { CourseRules.time(endTime)<=CourseRules.time(startTime) }.getOrDefault(true)) { fail(R.string.time_invalid); return }
