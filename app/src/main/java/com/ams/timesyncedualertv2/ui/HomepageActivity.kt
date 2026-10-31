@@ -98,17 +98,39 @@ class HomepageActivity : AppCompatActivity() {
             oldBottom ->
             if (right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop)
                 renderNext()
+            if (right - left != oldRight - oldLeft) {
+                val tabs = findViewById<TabLayout>(R.id.tab_layout)
+                tabs.post {
+                    tabs.setScrollPosition(
+                        findViewById<ViewPager2>(R.id.pager).currentItem,
+                        0f,
+                        true,
+                    )
+                }
+            }
         }
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         toolbar.subtitle = DateFormat.getDateInstance(DateFormat.FULL).format(Date())
+        toolbar.setSubtitleTextAppearance(
+            this,
+            com.google.android.material.R.style.TextAppearance_Material3_BodyMedium,
+        )
+        toolbar.setSubtitleTextColor(
+            com.google.android.material.color.MaterialColors.getColor(
+                toolbar,
+                com.google.android.material.R.attr.colorOnSurfaceVariant,
+            ),
+        )
         toolbar.menu.add(0, 1, 0, R.string.settings).apply {
             setIcon(R.drawable.ic_settings)
-            icon?.setTint(
-                com.google.android.material.color.MaterialColors.getColor(
-                    toolbar,
-                    com.google.android.material.R.attr.colorOnSurface,
-                ),
-            )
+            icon
+                ?.mutate()
+                ?.setTint(
+                    com.google.android.material.color.MaterialColors.getColor(
+                        toolbar,
+                        com.google.android.material.R.attr.colorOnSurface,
+                    ),
+                )
             setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_ALWAYS)
         }
         toolbar.setOnMenuItemClickListener {
@@ -184,6 +206,17 @@ class HomepageActivity : AppCompatActivity() {
         val card = findViewById<View>(R.id.next_course_card)
         val next = Timetable.next(allCourses, ZonedDateTime.now())
         val root = findViewById<View>(R.id.root)
+        val tabs = findViewById<TabLayout>(R.id.tab_layout)
+        val width =
+            (root.width - root.paddingLeft - root.paddingRight) / resources.displayMetrics.density
+        if (width > 0) {
+            val mode = if (width < 336) TabLayout.MODE_SCROLLABLE else TabLayout.MODE_FIXED
+            if (tabs.tabMode != mode) tabs.tabMode = mode
+            val gravity =
+                if (mode == TabLayout.MODE_FIXED) TabLayout.GRAVITY_FILL
+                else TabLayout.GRAVITY_CENTER
+            if (tabs.tabGravity != gravity) tabs.tabGravity = gravity
+        }
         val height =
             (root.height - root.paddingTop - root.paddingBottom) / resources.displayMetrics.density
         findViewById<View>(R.id.toolbar).visibility =
