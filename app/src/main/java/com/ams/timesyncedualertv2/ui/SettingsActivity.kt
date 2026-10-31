@@ -68,10 +68,9 @@ class SettingsActivity : AppCompatActivity() {
         edittextTimeBefore.hint =
             getString(R.string.reminder_time_text, sharedPreferences.getInt("reminder_time", 10))
         buttonSubmit.setOnClickListener {
-            val timeBefore = edittextTimeBefore.text.toString()
+            val reminderTime = edittextTimeBefore.text.toString().trim().toIntOrNull()
             // Check if the input is a valid number between 1 and 1440 (minutes)
-            if (timeBefore.matches(Regex("\\d+")) && timeBefore.toInt() in 1..1440) {
-                val reminderTime = timeBefore.toInt()
+            if (reminderTime != null && reminderTime in 1..1440) {
 
                 // Save the new reminder time in SharedPreferences
                 editor.putInt("reminder_time", reminderTime)

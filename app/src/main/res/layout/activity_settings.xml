@@ -102,7 +102,7 @@
         android:textColorHint="@color/white"
         android:hint="@string/hint_minute_s"
         android:textColor="@color/white"
-        android:inputType="text" />
+        android:inputType="number" />
 
         </LinearLayout>
 
