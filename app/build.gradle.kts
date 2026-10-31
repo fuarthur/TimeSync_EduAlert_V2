@@ -30,6 +30,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     testOptions {
+        animationsDisabled = true
         unitTests.isIncludeAndroidResources = true
     }
 }
