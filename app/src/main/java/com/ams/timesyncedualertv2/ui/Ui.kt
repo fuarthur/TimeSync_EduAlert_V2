@@ -55,8 +55,12 @@ object Ui {
             if (width > 0 && content.layoutParams.width != width)
                 content.layoutParams = content.layoutParams.apply { this.width = width }
         }
-        if (back != null)
-            a.findViewById<MaterialToolbar>(R.id.toolbar).setNavigationOnClickListener { back() }
+        if (back != null) {
+            a.findViewById<MaterialToolbar>(R.id.toolbar).apply {
+                navigationContentDescription = a.getString(R.string.hint_back)
+                setNavigationOnClickListener { back() }
+            }
+        }
     }
 
     fun message(a: AppCompatActivity, text: Int) =
