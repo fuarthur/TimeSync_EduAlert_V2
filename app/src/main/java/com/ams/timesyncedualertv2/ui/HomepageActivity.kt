@@ -131,7 +131,7 @@ class HomepageActivity : AppCompatActivity() {
                         com.google.android.material.R.attr.colorOnSurface,
                     ),
                 )
-            setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_ALWAYS)
+            setShowAsAction(android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM)
         }
         toolbar.setOnMenuItemClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
