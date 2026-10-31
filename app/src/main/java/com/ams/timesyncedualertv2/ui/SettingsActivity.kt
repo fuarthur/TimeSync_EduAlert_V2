@@ -207,7 +207,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun showPreview(courses: List<CourseEntity>) {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.import_title)
-            .setMessage(getString(R.string.import_message, courses.size))
+            .setMessage(resources.getQuantityString(R.plurals.import_message, courses.size, courses.size))
             .setNegativeButton(R.string.cancel) { _, _ -> pendingUri = null }
             .setOnCancelListener { pendingUri = null }
             .setPositiveButton(R.string.replace) { _, _ ->

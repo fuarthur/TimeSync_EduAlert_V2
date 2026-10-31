@@ -50,7 +50,9 @@
     <string name="clear_message">这会移除所有课程。如需保留副本，请先导出备份。</string>
     <string name="cleared">课表已清空</string>
     <string name="import_title">替换当前课表？</string>
-    <string name="import_message">所选文件包含 %1$d 门课程。确认后才会替换当前课表。</string>
+    <plurals name="import_message">
+        <item quantity="other">所选文件包含 %1$d 门课程。确认后才会替换当前课表。</item>
+    </plurals>
     <string name="replace">替换课表</string>
     <string name="imported">课表已导入</string>
     <string name="exported">备份已保存</string>

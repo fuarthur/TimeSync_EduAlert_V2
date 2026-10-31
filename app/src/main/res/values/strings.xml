@@ -53,7 +53,10 @@
     <string name="clear_message">All courses will be removed. Export a backup first if you want to keep a copy.</string>
     <string name="cleared">Timetable cleared</string>
     <string name="import_title">Replace your timetable?</string>
-    <string name="import_message">The selected file contains %1$d courses. Your current timetable will be replaced after you confirm.</string>
+    <plurals name="import_message">
+        <item quantity="one">The selected file contains %1$d course. Your current timetable will be replaced after you confirm.</item>
+        <item quantity="other">The selected file contains %1$d courses. Your current timetable will be replaced after you confirm.</item>
+    </plurals>
     <string name="replace">Replace timetable</string>
     <string name="imported">Timetable imported</string>
     <string name="exported">Backup saved</string>
