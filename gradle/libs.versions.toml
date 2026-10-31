@@ -1,5 +1,6 @@
 [versions]
 agp = "9.5.0"
+kotlin = "2.4.21"
 gson = "2.15.0"
 coreKtx = "1.19.1"
 junit = "4.13.2"
@@ -15,6 +16,7 @@ androidTestCore = "1.7.0"
 ksp = "2.3.13"
 
 [libraries]
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidTestCore" }

@@ -42,7 +42,7 @@ Requires Android SDK 37.0, Build Tools 36.0.0 and JDK 17. Use an Android Studio 
 ./gradlew testDebugUnitTest assembleDebug assembleRelease lintDebug lintRelease
 ```
 
-Both build variants are checked explicitly; Lint warnings fail verification.
+Both build variants are checked explicitly. Gradle deprecations and Lint warnings fail verification.
 
 With a test emulator connected:
 
@@ -55,6 +55,8 @@ Debug APK: `app/build/outputs/apk/debug/app-debug.apk`.
 The code uses Kotlin, Android Views/Material, Room, coroutines and Gson. No account, cloud backend, analytics or network permission is required.
 
 ## Maintenance notes
+
+- [Kotlin plugin fix and strict verification](docs/KOTLIN_PLUGIN_FIX.md)
 
 - [Lint cleanup, dependency versions and verification](docs/LINT_CLEANUP.md)
 

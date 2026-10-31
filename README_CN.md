@@ -34,7 +34,7 @@
 ./gradlew testDebugUnitTest assembleDebug assembleRelease lintDebug lintRelease
 ```
 
-命令分别检查 Debug 和 Release；出现 Lint 警告会令检查失败。
+命令分别检查 Debug 和 Release；出现 Gradle 弃用提示或 Lint 警告会令检查失败。
 
 连接测试模拟器后运行完整操作流程测试：
 
@@ -47,6 +47,8 @@
 技术栈为 Kotlin、Android Views/Material、Room、协程和 Gson。无需账号、云端服务或网络权限。
 
 ## 维护记录
+
+- [Kotlin 插件修复与严格验证](docs/KOTLIN_PLUGIN_FIX.md)
 
 - [Lint 清理、依赖版本与验证记录](docs/LINT_CLEANUP.md)
 

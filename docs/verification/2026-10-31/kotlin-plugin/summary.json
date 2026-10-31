@@ -1,0 +1,41 @@
+{
+  "base_commit": "7654a93",
+  "kotlin_gradle_plugin": "2.4.21",
+  "gradle": "9.8.2",
+  "jdk": 17,
+  "strict_deprecations": true,
+  "local_tests": {
+    "tests": 41,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "lint": {
+    "debug": 0,
+    "release": 0
+  },
+  "builds": {
+    "debug": "passed",
+    "release": "passed"
+  },
+  "executed_tasks": 102,
+  "device_tests": {
+    "37": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "33": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "deprecation_regression": {
+    "strict_help_before": "failed",
+    "strict_help_after": "passed"
+  },
+  "debug_apk_sha256": "61292447537b77e483463b2193458b1435beb738af9081523db709824a08e58d"
+}

@@ -1,5 +1,7 @@
 # 验证记录
 
+Kotlin 插件弃用提示的后续修复及严格验证见 [KOTLIN_PLUGIN_FIX.md](KOTLIN_PLUGIN_FIX.md)。
+
 2026-10-31 最新结果：Debug 和 Release 均为 0 条 Lint 问题，41 项本地测试、Android 13/17 各 7 项设备测试，以及干净检出下的两个构建均通过，见 [Lint 清理验证](LINT_CLEANUP.md)。下文保留 2026-10-30 首轮功能验证记录。
 
 验证对象：`codex/timetable-refresh`，代码提交 `3f0fca3`。结果记录于 2026-10-30（America/Chicago）。截图使用虚构课程，没有用户的真实课表。

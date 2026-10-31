@@ -57,7 +57,7 @@
 | 移除旧的特殊闹钟权限误报屏蔽 | `469628a` |
 | 将新增 Lint 警告作为检查失败 | `4a5ca96` |
 
-## 最终版本
+## 本轮 Lint 清理时的版本
 
 | 组件 | 版本 |
 | --- | --- |
@@ -74,7 +74,7 @@ Room 升级时保留 `courses.db`、版本 1、完整导出结构以及身份值
 
 ## 最终验证
 
-代码版本：`4a5ca96`，2026-10-31。全部后续变更为说明和验证材料。
+本节记录 2026-10-31 的 Lint 清理轮次，代码版本为 `4a5ca96`。后续 Kotlin 插件修复及最新验证见 [KOTLIN_PLUGIN_FIX.md](KOTLIN_PLUGIN_FIX.md)。
 
 从 `git archive` 创建仅含已提交文件的全新目录，使用 JDK 17 和 Android SDK 37.0，不复制 `local.properties` 或 IDE 配置：
 
@@ -101,4 +101,4 @@ Room 升级时保留 `courses.db`、版本 1、完整导出结构以及身份值
 
 `warningsAsErrors = true` 已生效；没有设置警告基线、关闭检查或添加忽略规则。原有的特殊闹钟权限误报屏蔽也已移除，最终两个 Lint 报告均没有任何问题。
 
-构建日志仍有一项上游工具链弃用提示：AGP 内置 Kotlin 插件调用 Gradle 的 `Configuration.setVisible`。调用栈位于 `KotlinPluginWrapper` 和 `BuiltInKotlinServices`，并非本项目脚本；该提示不属于 Lint 结果，未做屏蔽，当前稳定工具链构建成功。实体机厂商省电策略和长期待机提醒仍不在本次模拟器验证范围内。
+本轮验证时曾有 AGP 默认 Kotlin 插件调用 `Configuration.setVisible` 的弃用提示；现已通过[后续 Kotlin 插件升级](KOTLIN_PLUGIN_FIX.md)消除。实体机厂商省电策略和长期待机提醒仍不在本次模拟器验证范围内。

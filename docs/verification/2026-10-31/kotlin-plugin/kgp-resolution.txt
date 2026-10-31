@@ -1,0 +1,15 @@
++--- org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.21
+|    +--- org.jetbrains.kotlin:kotlin-gradle-plugins-bom:2.4.21
+|    |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:2.4.21 (c)
+|    |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.21 (c)
+|    |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-annotations:2.4.21 (c)
+|    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:2.4.21
+|    |    +--- org.jetbrains.kotlin:kotlin-gradle-plugins-bom:2.4.21 (*)
+|    |    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-annotations:2.4.21
+|    |    \--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:2.4.21 (*)
+|    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-idea:2.4.21
+|    |    \--- org.jetbrains.kotlin:kotlin-gradle-plugin-annotations:2.4.21
+|    +--- org.jetbrains.kotlin:kotlin-gradle-plugin-idea-proto:2.4.21
+|    |    \--- org.jetbrains.kotlin:kotlin-gradle-plugin-idea:2.4.21 (*)
+|         +--- org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.10 -> 2.4.21 (*)
+|              +--- org.jetbrains.kotlin:kotlin-gradle-plugin-api:2.2.10 -> 2.4.21 (*)
