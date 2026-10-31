@@ -12,7 +12,7 @@ class CourseReminderReceiver:BroadcastReceiver() {
     override fun onReceive(context:Context,intent:Intent) {
         val result=goAsync()
         CoroutineScope(SupervisorJob()+Dispatchers.IO).launch {
-            val db=Room.databaseBuilder(context.applicationContext,AppDatabase::class.java,"courses.db").build()
+            val db=AppDatabase.getInstance(context.applicationContext)
             try {
                 val preferences=context.getSharedPreferences("user_settings",Context.MODE_PRIVATE)
                 if (!preferences.getBoolean("enable_notifications",true)) return@launch
@@ -21,7 +21,7 @@ class CourseReminderReceiver:BroadcastReceiver() {
                 if (day !in course.weekday || runCatching { CourseRules.validate(course) }.isFailure) return@launch
                 NotificationUtils.postReminder(context,course)
                 NotificationUtils.scheduleCourse(context,course,day,preferences.getInt("reminder_time",10).coerceIn(1,1440))
-            } finally { db.close(); result.finish() }
+            } finally { result.finish() }
         }
     }
 }

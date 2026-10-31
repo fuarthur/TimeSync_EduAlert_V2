@@ -41,10 +41,7 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
 
         // 获取数据库实例
-        val db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "courses.db"
-        ).build()
+        val db = AppDatabase.getInstance(applicationContext)
         courseDao = db.courseDao()
 
         val sharedPreferences = getSharedPreferences("user_settings", MODE_PRIVATE)
@@ -105,8 +102,7 @@ class SettingsActivity : AppCompatActivity() {
 
 
         buttonBack.setOnClickListener {
-            intent = Intent(this, HomepageActivity::class.java)
-            startActivity(intent)
+            finish()
         }
 
         // 设置导入按钮点击事件
@@ -219,10 +215,7 @@ class SettingsActivity : AppCompatActivity() {
                         BackupCodec.decode(json)
 
                     // 插入到数据库中
-                    val db = Room.databaseBuilder(
-                        applicationContext,
-                        AppDatabase::class.java, "courses.db"
-                    ).build()
+                    val db = AppDatabase.getInstance(applicationContext)
                     val courseDao = db.courseDao()
                     db.withTransaction {
                         courseDao.deleteAllCourses()
@@ -254,10 +247,7 @@ class SettingsActivity : AppCompatActivity() {
     // 将课程导出到用户选择的文件路径
     private fun exportCoursesToUri(uri: Uri) {
         val contentResolver = contentResolver
-        val db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "courses.db"
-        ).build()
+        val db = AppDatabase.getInstance(applicationContext)
         val courseDao = db.courseDao()
 
         lifecycleScope.launch {

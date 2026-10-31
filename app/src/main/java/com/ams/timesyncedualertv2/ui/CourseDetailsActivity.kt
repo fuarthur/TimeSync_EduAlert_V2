@@ -41,10 +41,7 @@ class CourseDetailsActivity : AppCompatActivity() {
         courseDescriptionTextView.text = courseDescription
 
         // 获取数据库实例
-        val db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "courses.db"
-        ).build()
+        val db = AppDatabase.getInstance(applicationContext)
         val courseDao = db.courseDao()
 
         buttonBack.setOnClickListener {

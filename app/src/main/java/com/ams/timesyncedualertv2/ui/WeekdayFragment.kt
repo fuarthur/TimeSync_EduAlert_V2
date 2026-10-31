@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
@@ -48,21 +50,17 @@ class WeekdayFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
 
         // 获取数据库实例并初始化 courseDao
-        val db = Room.databaseBuilder(
-            requireContext().applicationContext,
-            AppDatabase::class.java, "courses.db"
-        ).build()
+        val db = AppDatabase.getInstance(requireContext().applicationContext)
         courseDao = db.courseDao() // 初始化 courseDao
 
         // 使用 viewLifecycleOwner.lifecycleScope 启动协程，保证协程在 Fragment 销毁时自动取消
         viewLifecycleOwner.lifecycleScope.launch {
-            val weekday = arguments?.getString(ARG_WEEKDAY) ?: ""
-            val courses = getCoursesForWeekday(weekday)
-
-            // 更新 UI
-            if (courses.isNotEmpty()) {
-                courseAdapter = CourseAdapter(requireContext(), courses)
-                recyclerView.adapter = courseAdapter
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                courseDao.observeAll().collect { all ->
+                    val day=mapWeekdayToInt(arguments?.getString(ARG_WEEKDAY) ?: "")
+                    courseAdapter=CourseAdapter(requireContext(),all.filter { day in it.weekday })
+                    recyclerView.adapter=courseAdapter
+                }
             }
         }
 

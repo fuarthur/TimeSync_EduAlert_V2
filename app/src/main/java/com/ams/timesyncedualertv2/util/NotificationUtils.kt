@@ -46,7 +46,7 @@ object NotificationUtils {
         cancelCourseReminders(context)
         if (!settings(context).getBoolean("enable_notifications",true)) return@withLock
         if (ContextCompat.checkSelfPermission(context,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) return@withLock
-        val db=Room.databaseBuilder(context.applicationContext,AppDatabase::class.java,"courses.db").build()
+        val db=AppDatabase.getInstance(context.applicationContext)
         try {
             val minutes=settings(context).getInt("reminder_time",10).coerceIn(1,1440)
             db.courseDao().getAllCourses().forEach { course ->
@@ -54,7 +54,7 @@ object NotificationUtils {
                     course.weekday.forEach { day -> scheduleCourse(context,course,day,minutes) }
                 }
             }
-        } finally { db.close() }
+        } finally { /* Application owns the database. */ }
     }
 
     @Synchronized

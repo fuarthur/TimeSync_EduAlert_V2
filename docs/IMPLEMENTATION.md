@@ -8,3 +8,4 @@ Base: 73374cd. Branch: codex/timetable-refresh. User delegated feature/UI choice
 - Import validation: BackupCodec fixtures RED (missing boundary) → GREEN; complete suite 8 tests passed. Invalid records never reach Room.
 - Details click: oneTapOpensCourseDetails RED→GREEN. Interval: submitRejectsZeroLengthCourse RED (stored 1) → GREEN (stored 0).
 - Scheduling: ReminderTime boundary cases RED→GREEN (week rollover, advance offset, previous-day reminder, DST); complete suite passed. Real AlarmManager/PendingIntent dispatch replaces immediate notify calls.
+- Reminder preference: disabled refresh RED (2 alarms) → GREEN (0 alarms). Draft recreation RED→GREEN. Live list RED (1 stale row after clear) → GREEN (0); shared Application database and lifecycle Flow observation fix the root cause.

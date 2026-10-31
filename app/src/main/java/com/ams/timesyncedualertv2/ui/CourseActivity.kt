@@ -49,10 +49,7 @@ class CourseActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_course)
 
-        val db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "courses.db"
-        ).build()
+        val db = AppDatabase.getInstance(applicationContext)
         val courseDao = db.courseDao()
 
         courseId = intent.getIntExtra("course_id", -1)
@@ -214,8 +211,7 @@ class CourseActivity : AppCompatActivity() {
 
 
         buttonBack.setOnClickListener {
-            val intent = Intent(this, HomepageActivity::class.java)
-            startActivity(intent)
+            finish()
         }
     }
 

@@ -5,6 +5,9 @@ import com.ams.timesyncedualertv2.model.CourseEntity
 
 @Dao
 interface CourseDao {
+    @Query("SELECT * FROM courses ORDER BY startTime, id")
+    fun observeAll(): kotlinx.coroutines.flow.Flow<List<CourseEntity>>
+
     @Insert
     suspend fun insert(course: CourseEntity)
 
