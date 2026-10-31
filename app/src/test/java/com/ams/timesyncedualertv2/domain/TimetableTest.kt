@@ -22,4 +22,14 @@ class TimetableTest {
         assertEquals(listOf(1),Timetable.onDay(courses,6," sieBEL ").map { it.id })
         assertTrue(Timetable.onDay(courses,6,"physics").isEmpty())
     }
+    @Test fun springDstClassEndsAtDeclaredLocalTime() {
+        val now=ZonedDateTime.parse("2026-03-08T03:45-04:00[America/New_York]")
+        val next=Timetable.next(listOf(course(1,7,"01:30","03:30")),now)!!
+        assertFalse("The 03:30 class has finished",next.ongoing)
+        assertEquals("2026-03-15T01:30-04:00[America/New_York]",next.start.toString())
+    }
+    @Test fun fallDstClassRemainsOngoingUntilDeclaredLocalEnd() {
+        val next=Timetable.next(listOf(course(1,7,"01:30","03:30")),ZonedDateTime.parse("2026-11-01T03:00-05:00[America/New_York]"))!!
+        assertTrue(next.ongoing)
+    }
 }

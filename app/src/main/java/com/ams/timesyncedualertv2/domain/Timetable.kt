@@ -2,7 +2,6 @@ package com.ams.timesyncedualertv2.domain
 
 import com.ams.timesyncedualertv2.model.CourseEntity
 import java.time.DayOfWeek
-import java.time.Duration
 import java.time.ZonedDateTime
 import java.time.temporal.TemporalAdjusters
 
@@ -17,11 +16,12 @@ object Timetable {
     fun next(courses:List<CourseEntity>,now:ZonedDateTime):CourseOccurrence? = courses.flatMap { c ->
         if(runCatching { CourseRules.validate(c) }.isFailure) return@flatMap emptyList()
         val time=CourseRules.time(c.startTime)
-        val duration=Duration.between(time,CourseRules.time(c.endTime))
+        val endTime=CourseRules.time(c.endTime)
         c.weekday.map { day ->
             var date=now.toLocalDate().with(TemporalAdjusters.nextOrSame(DayOfWeek.of(day)))
             var start=date.atTime(time).atZone(now.zone)
-            val ongoing=!now.isBefore(start) && now.isBefore(start.plus(duration))
+            val end=date.atTime(endTime).atZone(now.zone)
+            val ongoing=!now.isBefore(start) && now.isBefore(end)
             if(!ongoing && !start.isAfter(now)) { date=date.plusWeeks(1); start=date.atTime(time).atZone(now.zone) }
             CourseOccurrence(c,start,ongoing)
         }
