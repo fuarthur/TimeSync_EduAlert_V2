@@ -21,6 +21,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.ZonedDateTime
+import java.time.Instant
+import android.util.Log
 
 object NotificationUtils {
     private const val CHANNEL="timesync_edualert"
@@ -31,14 +33,17 @@ object NotificationUtils {
 
     fun createNotificationChannel(context:Context) {
         context.getSystemService(NotificationManager::class.java).createNotificationChannel(
-            NotificationChannel(CHANNEL,"Course reminders",NotificationManager.IMPORTANCE_HIGH)
+            NotificationChannel(CHANNEL,context.getString(R.string.notifications),NotificationManager.IMPORTANCE_HIGH)
         )
     }
 
     @Suppress("UNUSED_PARAMETER")
     fun enableCourseReminders(context:Context,lifecycleScope:CoroutineScope) {
         val app=context.applicationContext
-        scope.launch { reschedule(app) }
+        scope.launch {
+            try { reschedule(app) }
+            catch(e:Exception) { if(e is CancellationException) throw e; Log.e("TimeSync","Could not refresh reminders",e) }
+        }
     }
 
     suspend fun reschedule(context:Context) = mutex.withLock {
@@ -61,19 +66,19 @@ object NotificationUtils {
         if (!settings(context).getBoolean("enable_notifications",true)) return
         val alarm=context.getSystemService(AlarmManager::class.java)
         val trigger=ReminderTime.next(course,day,minutes,now).toInstant().toEpochMilli()
-        val pending=pending(context,course.id,day)
+        val pending=pending(context,course.id,day,trigger)
         try {
             if (alarm.canScheduleExactAlarms()) alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,trigger,pending)
             else alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,trigger,pending)
         } catch (_:SecurityException) { alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,trigger,pending) }
         val keys=settings(context).getStringSet(KEYS,emptySet()).orEmpty().toMutableSet()
         keys.add("${course.id}/$day")
-        settings(context).edit().putStringSet(KEYS,keys).apply()
+        settings(context).edit().putStringSet(KEYS,keys).putLong("trigger_${course.id}/$day",trigger).apply()
     }
 
-    private fun pending(context:Context,id:Int,day:Int)=PendingIntent.getBroadcast(context,0,
+    private fun pending(context:Context,id:Int,day:Int,trigger:Long=-1L)=PendingIntent.getBroadcast(context,0,
         Intent(context,CourseReminderReceiver::class.java).setData(Uri.parse("timesync://course/$id/$day"))
-            .putExtra("course_id",id).putExtra("weekday",day),
+            .putExtra("course_id",id).putExtra("weekday",day).putExtra("trigger_at",trigger),
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
     fun cancelNotificationForCourse(context:Context,course:CourseEntity) {
@@ -85,14 +90,32 @@ object NotificationUtils {
     @Synchronized
     fun cancelCourseReminders(context:Context) {
         val alarm=context.getSystemService(AlarmManager::class.java)
+        val editor=settings(context).edit().remove(KEYS)
         settings(context).getStringSet(KEYS,emptySet()).orEmpty().forEach { key ->
             val parts=key.split("/")
             val id=parts.getOrNull(0)?.toIntOrNull()
             val day=parts.getOrNull(1)?.toIntOrNull()
-            if (id!=null && day!=null) alarm.cancel(pending(context,id,day))
+            if (id!=null && day!=null) { val token=pending(context,id,day); alarm.cancel(token); token.cancel() }
+            editor.remove("trigger_$key")
         }
-        settings(context).edit().remove(KEYS).apply()
+        editor.apply()
         context.getSystemService(NotificationManager::class.java).cancelAll()
+    }
+
+    suspend fun handleAlarm(context:Context,id:Int,day:Int,trigger:Long,now:ZonedDateTime=ZonedDateTime.now()) = mutex.withLock {
+        val preferences=settings(context)
+        if(!preferences.getBoolean("enable_notifications",true) || trigger<=0 || preferences.getLong("trigger_$id/$day",-1L)!=trigger) return@withLock
+        val course=AppDatabase.getInstance(context).courseDao().getCourseById(id) ?: return@withLock
+        if(day !in course.weekday || runCatching { CourseRules.validate(course) }.isFailure) return@withLock
+        val minutes=preferences.getInt("reminder_time",10).coerceIn(1,1440)
+        val before=Instant.ofEpochMilli(trigger-1).atZone(now.zone)
+        val currentTrigger=ReminderTime.next(course,day,minutes,before).toInstant().toEpochMilli()
+        if(currentTrigger==trigger && now.toInstant().toEpochMilli()>=trigger) {
+            val classDate=Instant.ofEpochMilli(trigger).atZone(now.zone).plusMinutes(minutes.toLong()).toLocalDate()
+            val end=classDate.atTime(CourseRules.time(course.endTime)).atZone(now.zone)
+            if(now.isBefore(end)) postReminder(context,course)
+        }
+        scheduleCourse(context,course,day,minutes,now)
     }
 
     fun refreshReminders(context:Context,lifecycleScope:CoroutineScope)=enableCourseReminders(context,lifecycleScope)
