@@ -72,7 +72,26 @@ class HomepageActivity:AppCompatActivity() {
             launch { while(isActive) { renderNext(); delay(30_000) } }
             (application as TimeSyncApplication).repository.courses.collect { allCourses=it; renderNext() }
         } }
+        openRequestedCourse(intent)
         NotificationUtils.createNotificationChannel(this)
+    }
+    override fun onNewIntent(intent:Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        openRequestedCourse(intent)
+    }
+    private fun openRequestedCourse(incoming:Intent) {
+        val id=incoming.getIntExtra("open_course_id",-1)
+        incoming.removeExtra("open_course_id")
+        if(id<=0) return
+        findViewById<View>(R.id.root).post {
+            lifecycleScope.launch {
+                try {
+                    val course=(application as TimeSyncApplication).repository.get(id)
+                    if(course!=null) openCourse(course) else Ui.message(this@HomepageActivity,R.string.missing_course)
+                } catch(e:Exception) { if(e is CancellationException) throw e; Ui.error(this@HomepageActivity,e) }
+            }
+        }
     }
     private fun renderNext() {
         val card=findViewById<View>(R.id.next_course_card)

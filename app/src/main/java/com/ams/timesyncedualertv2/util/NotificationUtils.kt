@@ -16,7 +16,7 @@ import com.ams.timesyncedualertv2.db.AppDatabase
 import com.ams.timesyncedualertv2.domain.CourseRules
 import com.ams.timesyncedualertv2.domain.ReminderTime
 import com.ams.timesyncedualertv2.model.CourseEntity
-import com.ams.timesyncedualertv2.ui.CourseDetailsActivity
+import com.ams.timesyncedualertv2.ui.HomepageActivity
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -124,10 +124,9 @@ object NotificationUtils {
         if (!settings(context).getBoolean("enable_notifications",true)) return
         if (ContextCompat.checkSelfPermission(context,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) return
         createNotificationChannel(context)
-        val intent=Intent(context,CourseDetailsActivity::class.java).apply {
-            putExtra("course_id",course.id); putExtra("course_name",course.name)
-            putExtra("course_location",course.location); putExtra("course_start_time",course.startTime)
-            putExtra("course_end_time",course.endTime); putExtra("course_description",course.description)
+        val intent=Intent(context,HomepageActivity::class.java).apply {
+            flags=Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            putExtra("open_course_id",course.id)
         }
         val content=PendingIntent.getActivity(context,course.id,intent,PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val notification=NotificationCompat.Builder(context,CHANNEL)

@@ -6,7 +6,7 @@ Review range: 73374cd..f00a02f. Read-only reviewer found no critical issue and s
 - [x] Imported maximum Int IDs must not wrap the next generated course ID.
 - [x] Backup replacement must enforce the same no-overlap invariant as ordinary saves.
 - [x] A delivering alarm must not overwrite a newer course schedule.
-- [ ] Notification entry must retain the homepage result path for delete Undo.
+- [x] Notification entry must retain the homepage result path for delete Undo.
 - [ ] Long summary content, landscape and the keyboard must leave timetable rows usable.
 - [ ] Minor: refresh the toolbar date across midnight.
 
@@ -21,3 +21,5 @@ ID regression: importing Int.MAX_VALUE then saving another course failed with a 
 Overlap regressions: parser preview and repository replacement both failed before shared schedule validation; all 35 local tests passed after the fix, with the prior timetable retained on rejection.
 
 Alarm delivery: controlled stale-delivery interleaving and current-delivery rearm tests passed. The receiver now passes only identity/timestamp into the shared mutex, reloads current data and rejects outdated trigger timestamps; full suite 37 tests passed.
+
+Notification routing: both the notification PendingIntent target and Home result-launcher regression failed before the fix. All 39 local tests passed after routing notification entry through Home.
