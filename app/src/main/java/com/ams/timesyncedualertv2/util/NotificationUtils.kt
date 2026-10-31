@@ -44,6 +44,7 @@ object NotificationUtils {
 
     suspend fun reschedule(context:Context) = mutex.withLock {
         cancelCourseReminders(context)
+        if (!settings(context).getBoolean("enable_notifications",true)) return@withLock
         if (ContextCompat.checkSelfPermission(context,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) return@withLock
         val db=Room.databaseBuilder(context.applicationContext,AppDatabase::class.java,"courses.db").build()
         try {
@@ -56,7 +57,9 @@ object NotificationUtils {
         } finally { db.close() }
     }
 
+    @Synchronized
     fun scheduleCourse(context:Context,course:CourseEntity,day:Int,minutes:Int,now:ZonedDateTime=ZonedDateTime.now()) {
+        if (!settings(context).getBoolean("enable_notifications",true)) return
         val alarm=context.getSystemService(AlarmManager::class.java)
         val trigger=ReminderTime.next(course,day,minutes,now).toInstant().toEpochMilli()
         val pending=pending(context,course.id,day)
@@ -80,6 +83,7 @@ object NotificationUtils {
         context.getSystemService(NotificationManager::class.java).cancel(course.id)
     }
 
+    @Synchronized
     fun cancelCourseReminders(context:Context) {
         val alarm=context.getSystemService(AlarmManager::class.java)
         settings(context).getStringSet(KEYS,emptySet()).orEmpty().forEach { key ->
@@ -95,6 +99,7 @@ object NotificationUtils {
     fun refreshReminders(context:Context,lifecycleScope:CoroutineScope)=enableCourseReminders(context,lifecycleScope)
 
     fun postReminder(context:Context,course:CourseEntity) {
+        if (!settings(context).getBoolean("enable_notifications",true)) return
         if (ContextCompat.checkSelfPermission(context,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) return
         createNotificationChannel(context)
         val intent=Intent(context,CourseDetailsActivity::class.java).apply {
