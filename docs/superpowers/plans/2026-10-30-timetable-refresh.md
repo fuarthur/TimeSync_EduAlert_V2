@@ -31,10 +31,10 @@
 - [x] 9. Live course lists: DAO Flow and view-lifecycle observation; back-stack navigation uses finish(). Device system Back regression RED→GREEN.
 - [x] 10. Numeric input: bounded toIntOrNull parsing and numeric keyboard. Overflow regression RED→GREEN.
 - [x] 11. Data architecture: application-level database/repository, atomic conflict-check-and-save, IO backup service, consistent LocalTime use. Run unit/device suites.
-- [ ] 12. Material UI redesign: unified light/dark tokens, proper app bars, readable list, accessible form/settings, status/error/empty states, localization. Verify emulator captures.
-- [ ] 13. Seven-day timetable, next-class summary and search. Unit boundary fixtures and device filters.
-- [ ] 14. Duplicate course and delete undo. Device duplicate draft + restore.
-- [ ] 15. Versioned backup preview/export, limits and legacy roundtrip. Unit/device replacement roundtrip.
+- [x] 12. Material UI redesign: unified light/dark tokens, proper app bars, readable list, accessible form/settings, status/error/empty states, localization. Verify emulator captures.
+- [x] 13. Seven-day timetable, next-class summary and search. Unit boundary fixtures and device filters.
+- [x] 14. Duplicate course and delete undo. Device duplicate draft + restore.
+- [x] 15. Versioned backup preview/export, limits and legacy roundtrip. Unit/device replacement roundtrip.
 - [ ] 16. Final independent review, targeted repairs, build/lint/device suite, screenshots and commit-to-issue changelog.
 
 ## Progress

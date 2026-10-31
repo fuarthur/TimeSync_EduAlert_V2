@@ -2,6 +2,7 @@ package com.ams.timesyncedualertv2.domain
 
 import com.ams.timesyncedualertv2.model.CourseEntity
 import com.google.gson.JsonObject
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 
 object BackupCodec {
@@ -12,8 +13,15 @@ object BackupCodec {
         try {
             require(json.toByteArray(Charsets.UTF_8).size <= MAX_BYTES) { "Backup is larger than 1 MB" }
             val root = JsonParser.parseString(json)
-            require(root.isJsonArray) { "Expected a course array" }
-            val array = root.asJsonArray
+            val array = if(root.isJsonArray) root.asJsonArray else {
+                require(root.isJsonObject) { "Expected a timetable backup" }
+                val document=root.asJsonObject
+                val version=document.get("schemaVersion")
+                require(version!=null && version.isJsonPrimitive && version.asJsonPrimitive.isNumber && version.asString=="1") { "Unsupported backup version" }
+                val values=document.get("courses")
+                require(values!=null && values.isJsonArray) { "Courses are missing" }
+                values.asJsonArray
+            }
             require(array.size() <= MAX_COURSES) { "Too many courses" }
             val courses = array.map { value ->
                 require(value.isJsonObject) { "Each course must be an object" }
@@ -37,6 +45,20 @@ object BackupCodec {
         } catch (e: Exception) {
             throw IllegalArgumentException(e.message ?: "Invalid timetable backup", e)
         }
+    }
+
+    fun encode(courses:List<CourseEntity>):String {
+        require(courses.size<=MAX_COURSES) { "Too many courses" }
+        val validated=courses.map(CourseRules::validate)
+        val gson=GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create()
+        val document=JsonObject().apply {
+            addProperty("schemaVersion",1)
+            addProperty("format","timesync-timetable")
+            add("courses",gson.toJsonTree(validated))
+        }
+        val json=gson.toJson(document)
+        require(json.toByteArray(Charsets.UTF_8).size<=MAX_BYTES) { "Backup is larger than 1 MB" }
+        return json
     }
 
     private fun text(o: JsonObject, key: String): String {

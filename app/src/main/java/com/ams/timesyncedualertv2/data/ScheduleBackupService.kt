@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import com.ams.timesyncedualertv2.domain.BackupCodec
 import com.ams.timesyncedualertv2.model.CourseEntity
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
@@ -24,10 +23,10 @@ class ScheduleBackupService(context:Context,private val repository:CourseReposit
             }
             output.toByteArray()
         } ?: throw IOException("Cannot open backup")
-        BackupCodec.decode(bytes.toString(Charsets.UTF_8))
+        BackupCodec.decode(Charsets.UTF_8.newDecoder().onMalformedInput(java.nio.charset.CodingErrorAction.REPORT).decode(java.nio.ByteBuffer.wrap(bytes)).toString())
     }
     suspend fun write(uri:Uri) = withContext(Dispatchers.IO) {
-        val json=Gson().toJson(repository.all())
+        val json=BackupCodec.encode(repository.all())
         resolver.openOutputStream(uri,"wt")?.bufferedWriter(Charsets.UTF_8)?.use { it.write(json) }
             ?: throw IOException("Cannot create backup")
     }
