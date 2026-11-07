@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuites tests="7" failures="0" errors="0" skipped="0" time="0.000" timestamp="2026-10-31T07:57:49" hostname="localhost">
+  <testsuite name="com.ams.timesyncedualertv2.CourseFlowsTest" tests="6" failures="0" errors="0" skipped="0" time="14.329" timestamp="2026-10-31T07:57:49" hostname="localhost">
+    <properties>
+      <property name="device" value="emulator-5582" />
+    </properties>
+    <testcase name="weekendDraftSurvivesRotationAndSaves" classname="com.ams.timesyncedualertv2.CourseFlowsTest" time="3.334" />
+    <testcase name="oneTapDeleteAndUndoRestoresCourse" classname="com.ams.timesyncedualertv2.CourseFlowsTest" time="2.327" />
+    <testcase name="notificationEntryStillOffersDeleteUndo" classname="com.ams.timesyncedualertv2.CourseFlowsTest" time="1.967" />
+    <testcase name="weekendSearchFiltersCourseAndShowsEmptyResult" classname="com.ams.timesyncedualertv2.CourseFlowsTest" time="1.692" />
+    <testcase name="systemBackAfterClearShowsCurrentData" classname="com.ams.timesyncedualertv2.CourseFlowsTest" time="2.383" />
+    <testcase name="longLocationKeepsTimetableUsableInLandscapeWithKeyboard" classname="com.ams.timesyncedualertv2.CourseFlowsTest" time="2.626" />
+  </testsuite>
+  <testsuite name="com.ams.timesyncedualertv2.ExampleInstrumentedTest" tests="1" failures="0" errors="0" skipped="0" time="0.002" timestamp="2026-10-31T07:57:49" hostname="localhost">
+    <properties>
+      <property name="device" value="emulator-5582" />
+    </properties>
+    <testcase name="useAppContext" classname="com.ams.timesyncedualertv2.ExampleInstrumentedTest" time="0.002" />
+  </testsuite>
+</testsuites>

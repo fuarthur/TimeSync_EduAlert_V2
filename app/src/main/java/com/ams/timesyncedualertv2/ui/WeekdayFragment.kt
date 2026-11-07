@@ -1,94 +1,99 @@
 package com.ams.timesyncedualertv2.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
 import com.ams.timesyncedualertv2.R
-import com.ams.timesyncedualertv2.db.AppDatabase
-import com.ams.timesyncedualertv2.db.CourseDao
+import com.ams.timesyncedualertv2.TimeSyncApplication
+import com.ams.timesyncedualertv2.domain.Timetable
 import com.ams.timesyncedualertv2.model.CourseAdapter
-import com.ams.timesyncedualertv2.model.CourseEntity
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 class WeekdayFragment : Fragment() {
-
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var courseAdapter: CourseAdapter
-    private lateinit var courseDao: CourseDao // 声明 courseDao
-
     companion object {
-        private const val ARG_WEEKDAY = "weekday"
-
-        // 创建 fragment 的工厂方法，通过参数生成不同的实例
-        fun newInstance(weekday: String): WeekdayFragment {
-            val fragment = WeekdayFragment()
-            val args = Bundle()
-            args.putString(ARG_WEEKDAY, weekday)
-            fragment.arguments = args
-            return fragment
-        }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_weekday, container, false)
-
-        // 初始化 RecyclerView
-        recyclerView = view.findViewById(R.id.courses_recycler_view)
-        recyclerView.layoutManager = LinearLayoutManager(context)
-
-        // 获取数据库实例并初始化 courseDao
-        val db = Room.databaseBuilder(
-            requireContext().applicationContext,
-            AppDatabase::class.java, "courses.db"
-        ).build()
-        courseDao = db.courseDao() // 初始化 courseDao
-
-        // 使用 viewLifecycleOwner.lifecycleScope 启动协程，保证协程在 Fragment 销毁时自动取消
-        viewLifecycleOwner.lifecycleScope.launch {
-            val weekday = arguments?.getString(ARG_WEEKDAY) ?: ""
-            val courses = getCoursesForWeekday(weekday)
-
-            // 更新 UI
-            if (courses.isNotEmpty()) {
-                courseAdapter = CourseAdapter(requireContext(), courses)
-                recyclerView.adapter = courseAdapter
+        fun newInstance(weekday: Int) =
+            WeekdayFragment().apply {
+                require(weekday in 1..7)
+                arguments = Bundle().apply { putInt("weekday", weekday) }
             }
-        }
-
-        return view
     }
 
-    private suspend fun getCoursesForWeekday(weekday: String): List<CourseEntity> {
-        val weekdayInt = mapWeekdayToInt(weekday)
-        Log.d("WeekdayFragment", "getCoursesForWeekday called with weekday: $weekday ($weekdayInt)")
+    override fun onCreateView(inflater: LayoutInflater, parent: ViewGroup?, state: Bundle?): View =
+        inflater.inflate(R.layout.fragment_weekday, parent, false)
 
-
-        return if (weekdayInt != -1) {
-            courseDao.getCoursesForWeekday(weekdayInt)
-        } else {
-            emptyList()
+    override fun onViewCreated(view: View, state: Bundle?) {
+        val list = view.findViewById<RecyclerView>(R.id.courses_recycler_view)
+        val empty = view.findViewById<View>(R.id.empty_state)
+        val title = view.findViewById<TextView>(R.id.empty_title)
+        val hint = view.findViewById<TextView>(R.id.empty_hint)
+        list.layoutManager = LinearLayoutManager(requireContext())
+        ViewCompat.setOnApplyWindowInsetsListener(list) { target, insets ->
+            val bottom = if (insets.isVisible(WindowInsetsCompat.Type.ime())) 16 else 104
+            target.setPadding(
+                target.paddingLeft,
+                target.paddingTop,
+                target.paddingRight,
+                (bottom * resources.displayMetrics.density).toInt(),
+            )
+            insets
         }
-    }
-
-    private fun mapWeekdayToInt(weekday: String): Int {
-        return when (weekday) {
-            "Mon." -> 1
-            "Tue." -> 2
-            "Wed." -> 3
-            "Thu." -> 4
-            "Fri." -> 5
-            else -> -1
+        ViewCompat.requestApplyInsets(list)
+        view.addOnLayoutChangeListener { _, _, top, _, bottom, _, _, _, _ ->
+            val compact = (bottom - top) / resources.displayMetrics.density < 200
+            hint.visibility = if (compact) View.GONE else View.VISIBLE
+            val padding = ((if (compact) 12 else 32) * resources.displayMetrics.density).toInt()
+            empty.setPadding(padding, padding, padding, padding)
+        }
+        empty.visibility = View.VISIBLE
+        title.setText(R.string.loading)
+        hint.text = ""
+        val day = requireArguments().getInt("weekday")
+        val home = requireActivity() as HomepageActivity
+        val adapter = CourseAdapter(requireContext(), emptyList()) { home.openCourse(it) }
+        list.adapter = adapter
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                try {
+                    combine(
+                            (requireActivity().application as TimeSyncApplication)
+                                .repository
+                                .courses,
+                            home.searchQuery,
+                        ) { all, query ->
+                            Timetable.onDay(all, day, query)
+                        }
+                        .collect { courses ->
+                            adapter.updateCourses(courses)
+                            empty.visibility = if (courses.isEmpty()) View.VISIBLE else View.GONE
+                            val searching = home.searchQuery.value.isNotBlank()
+                            title.setText(
+                                if (searching) R.string.empty_search else R.string.empty_day,
+                            )
+                            hint.setText(
+                                if (searching) R.string.empty_search_hint
+                                else R.string.empty_day_hint,
+                            )
+                        }
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    empty.visibility = View.VISIBLE
+                    title.setText(R.string.load_failed)
+                    hint.setText(R.string.retry)
+                    empty.setOnClickListener { requireActivity().recreate() }
+                }
+            }
         }
     }
 }

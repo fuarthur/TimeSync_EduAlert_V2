@@ -1,173 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/background_light"
-    android:orientation="vertical"
-    android:padding="16dp">
-
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginVertical="12dp"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/button_back"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/hint_back"
-            android:textSize="16sp"
-            android:layout_marginEnd="8dp" />
-
-        <Button
-            android:id="@+id/button_submit"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/hint_update"
-            android:textSize="16sp"
-            android:layout_marginStart="8dp" />
-
-    </LinearLayout>
-
-    <!-- Enable Notifications Switch (Purple CardView) -->
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@color/purple_500"
-        android:elevation="4dp"
-        android:padding="16dp"
-        app:cardCornerRadius="8dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16sp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/hint_enable_notifications"
-                android:textColor="@android:color/white"
-                android:textSize="18sp" />
-
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/switch_enable_notifications"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end" />
+<?xml version='1.0' encoding='utf-8'?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical">
+    <com.google.android.material.appbar.MaterialToolbar android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="wrap_content" app:title="@string/settings" app:navigationIcon="@drawable/ic_back" app:navigationIconTint="?attr/colorOnSurface" />
+    <androidx.core.widget.NestedScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
+        <LinearLayout android:id="@+id/main_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:orientation="vertical" android:padding="20dp">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:layout_marginBottom="12dp" android:text="@string/notifications" android:textAppearance="@style/App.Section" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/notifications_description" android:textAppearance="?attr/textAppearanceBodyLarge" />
+            <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/switch_enable_notifications" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="64dp" android:text="@string/reminders_enabled" />
+            <com.google.android.material.textfield.TextInputLayout style="@style/App.Field" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="@string/reminder_minutes">
+                <com.google.android.material.textfield.TextInputEditText android:id="@+id/edittext_time_before" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textCapSentences" android:maxLength="10" android:maxLines="1" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.button.MaterialButton android:id="@+id/button_submit" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/save_reminder" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:layout_marginBottom="12dp" android:text="@string/permissions" android:textAppearance="@style/App.Section" />
+            <TextView android:id="@+id/notification_status" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="?attr/textAppearanceBodyMedium" />
+            <com.google.android.material.button.MaterialButton style="@style/Widget.Material3.Button.TextButton" android:id="@+id/notification_permission_button" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/notification_settings" />
+            <TextView android:id="@+id/timing_status" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:textAppearance="?attr/textAppearanceBodyMedium" />
+            <com.google.android.material.button.MaterialButton style="@style/Widget.Material3.Button.TextButton" android:id="@+id/timing_permission_button" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/timing_settings" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:layout_marginBottom="12dp" android:text="@string/backup_title" android:textAppearance="@style/App.Section" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp" android:text="@string/backup_description" android:textAppearance="?attr/textAppearanceBodyLarge" />
+            <com.google.android.material.button.MaterialButton style="?attr/materialButtonOutlinedStyle" android:id="@+id/button_import_schedule" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:text="@string/import_backup" />
+            <com.google.android.material.button.MaterialButton style="?attr/materialButtonOutlinedStyle" android:id="@+id/button_export_schedule" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:text="@string/export_backup" />
+            <com.google.android.material.button.MaterialButton style="@style/Widget.Material3.Button.TextButton" android:id="@+id/button_clear_all_schedules" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:layout_marginTop="24dp" android:text="@string/clear_schedule" android:textColor="?attr/colorError" />
         </LinearLayout>
-
-
-    </androidx.cardview.widget.CardView>
-
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@color/purple_500"
-        android:elevation="4dp"
-        android:padding="16dp"
-        app:cardCornerRadius="8dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16sp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textColor="@color/white"
-        android:text="@string/hint_remind_me_before" />
-
-    <EditText
-        android:id="@+id/edittext_time_before"
-        android:layout_width="match_parent"
-        android:layout_marginHorizontal="10dp"
-        android:layout_height="50dp"
-        android:autofillHints="Course Name"
-        android:textColorHint="@color/white"
-        android:hint="@string/hint_minute_s"
-        android:textColor="@color/white"
-        android:inputType="text" />
-
-        </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
-
-    <!-- Import Schedule Button (Purple Button) -->
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@color/purple_500"
-        android:elevation="4dp"
-        android:padding="16dp"
-        app:cardCornerRadius="8dp">
-
-        <Button
-            android:id="@+id/button_import_schedule"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/purple_500"
-            android:text="@string/hint_import_schedule"
-            android:textColor="@android:color/white"
-            android:textSize="16sp" />
-    </androidx.cardview.widget.CardView>
-
-    <!-- Export Schedule Button (Purple Button) -->
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@color/purple_500"
-        android:elevation="4dp"
-        android:padding="16dp"
-        app:cardCornerRadius="8dp">
-
-        <Button
-            android:id="@+id/button_export_schedule"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:backgroundTint="@color/purple_500"
-            android:text="@string/hint_export_schedule"
-            android:textColor="@android:color/white"
-            android:textSize="16sp" />
-    </androidx.cardview.widget.CardView>
-
-    <!-- Clear All Schedules Button (Red Button) -->
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@color/red"
-        android:elevation="4dp"
-        android:padding="16dp"
-        app:cardCornerRadius="8dp">
-
-        <Button
-            android:id="@+id/button_clear_all_schedules"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            android:backgroundTint="@color/red"
-            android:text="@string/hint_clear_all_schedules"
-            android:textColor="#000000"
-            android:textSize="16sp" />
-    </androidx.cardview.widget.CardView>
-
+    </androidx.core.widget.NestedScrollView>
 </LinearLayout>

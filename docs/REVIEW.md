@@ -1,0 +1,33 @@
+# Final independent review
+
+Review range: 73374cd..f00a02f. Read-only reviewer found no critical issue and six important edge cases. Each was corrected in its own follow-up commit:
+
+- [x] DST ongoing state must use the declared local end time, rather than elapsed duration.
+- [x] Imported maximum Int IDs must not wrap the next generated course ID.
+- [x] Backup replacement must enforce the same no-overlap invariant as ordinary saves.
+- [x] A delivering alarm must not overwrite a newer course schedule.
+- [x] Notification entry must retain the homepage result path for delete Undo.
+- [x] Long summary content, landscape and the keyboard must leave timetable rows usable.
+- [x] Minor: refresh the toolbar date across midnight.
+
+Native verification before this follow-up: all 5 Android tests passed (four full user flows plus the existing package-context smoke test) on the isolated API 33 emulator. Local suite before this pass: 30 tests; debug build and Lint passed. Later results supersede these counts.
+
+The reviewer did not claim device/OEM Doze guarantees, hardware performance, or real permission-dialog testing. Local emulator results do not establish those.
+
+DST regression: spring and fall fixtures failed before the fix; all 32 local tests passed after resolving end time on the occurrence date.
+
+ID regression: importing Int.MAX_VALUE then saving another course failed with a negative ID; explicit checked positive-ID allocation passed the full 33-test suite without changing the Room schema or existing IDs.
+
+Overlap regressions: parser preview and repository replacement both failed before shared schedule validation; all 35 local tests passed after the fix, with the prior timetable retained on rejection.
+
+Alarm delivery: controlled stale-delivery interleaving and current-delivery rearm tests passed. The receiver now passes only identity/timestamp into the shared mutex, reloads current data and rejects outdated trigger timestamps; full suite 37 tests passed.
+
+Notification routing: both the notification PendingIntent target and Home result-launcher regression failed before the fix. All 39 local tests passed after routing notification entry through Home.
+
+Layout regression: the long-location landscape test failed with a collapsed pager before the fix. Bounded text, adaptive summary visibility and IME-aware list spacing passed all 7 native tests; all 39 local tests and Lint also passed. Test interactions wait for visible controls and asynchronous list updates.
+
+Minor date follow-up: the toolbar date is refreshed on resume/periodic render and only assigned when changed. No important findings remain unaddressed.
+
+Final verification at code commit 3f0fca3: 39 local tests and 7 native tests passed, Debug APK built, Lint reported 0 errors / 112 warnings. A fresh tracked-only archive on JDK 17 passed all 53 build/test/lint tasks. Manual captures cover light/dark, English/Chinese, font scale 1.3 and a wide screen. The final accessibility and selected-weekday fixes are separately committed. See VERIFICATION.md and CHANGES.md.
+
+2026-10-31 follow-up: all 112 remaining Lint warnings were resolved; both variants now report 0 issues. The original database remains compatible after the toolchain update. Updated verification and issue commits are recorded in LINT_CLEANUP.md.

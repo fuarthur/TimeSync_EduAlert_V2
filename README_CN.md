@@ -1,21 +1,62 @@
-# Android 课程表软件
-[English](README.md) | 中文
-## 简介
+# TimeSync EduAlert 课表
 
-本软件是一款安卓平台上的课程表应用，支持用户自定义课表内容，并提供课表数据的导入和导出功能（JSON 格式）。当前的提醒功能尚未完善，可能会出现一些 bug，未来版本将持续优化和修复此功能。
+[English](README.md) | 中文
+
+一款离线 Android 课表，用来安排课程、查看下一节课并设置提醒。
 
 ## 功能
 
-- 自定义课程表：用户可以自由添加、编辑和删除课程。
-- 导出/导入课表：支持将课程表导出为 JSON 文件，并能从 JSON 文件导入课程表，方便数据备份和跨设备同步。
-- 提醒功能（开发中）：目前提醒功能尚未完全开发，可能存在不稳定的情况。
+- 周一至周日课表，一门课程可选择多天重复；保存时检查时间冲突，支持选填地点、备注和课程颜色。
+- 首页显示正在进行或下一节课程，可在所选日期内按课程名称或地点搜索。
+- 添加、编辑、复制和删除课程；删除后可以撤销，从通知进入课程详情也支持撤销。
+- 屏幕旋转后保留草稿，编辑、导入或清空后列表自动更新。
+- 提前 1–1440 分钟的每周提醒，支持通知权限管理，以及重启、修改时间或时区后的重新安排。
+- 备份导出、导入预览和事务替换。取消导入、文件无效或替换失败时保留原课表。
+- Material 浅色与深色主题，简体中文和英文界面，适配键盘、大字体和较宽屏幕。
 
-## 技术栈
+## 提醒设置
 
-- 开发语言：Kotlin
-- 软件前身：[TimeSync_EduAlert](https://github.com/fuarthur/TimeSync_EduAlert)
-- 开源协议：MIT License
+在设置页开启提醒，并允许通知。精确提醒按钮会打开 Android 的“闹钟和提醒”权限页面；未获允许时使用非精确系统任务，Android 可能延迟提醒，应用会显示当前状态。机制见 [Android 官方说明](https://developer.android.com/develop/background-work/services/alarms)。
 
-## 使用许可
+课程按设备本地时区每周重复，所选的每一天都会分别安排。提醒触发时重新检查当前课程和触发时间，避免过时任务覆盖新的安排。
 
-本项目基于 MIT 协议开源，您可以自由地使用、修改和分发代码，但请保留原始版权声明。
+## 备份与旧数据
+
+继续使用原有 `courses.db` 和 Room 第 1 版数据库结构。兼容旧版课程数组 JSON，新导出格式包含 `schemaVersion: 1`、`format` 和 `courses`。
+
+导入上限为 1 MiB、1000 门课程。星期和 `HH:mm` 时间必须有效，课程名称不能为空，结束时间必须晚于当天的开始时间。重复的正数标识或重叠课程会在预览前被拒绝。确认预览中的课程数量后才替换现有课表，也可以导出空课表。
+
+## 构建与检查
+
+需要 Android SDK 37.0、Build Tools 36.0.0 和 JDK 17。可使用兼容 AGP 9.5 的 Android Studio，或直接通过 Gradle 构建。设置 `ANDROID_HOME`，或由 Android Studio 生成指向 SDK 的 `local.properties`。Gradle 启动文件和依赖版本目录均已提交。
+
+```sh
+./gradlew testDebugUnitTest assembleDebug assembleRelease lintDebug lintRelease
+```
+
+命令分别检查 Debug 和 Release；出现 Gradle 弃用提示或 Lint 警告会令检查失败。
+
+连接测试模拟器后运行完整操作流程测试：
+
+```sh
+./gradlew connectedDebugAndroidTest
+```
+
+调试安装包位置：`app/build/outputs/apk/debug/app-debug.apk`。
+
+技术栈为 Kotlin、Android Views/Material、Room、协程和 Gson。无需账号、云端服务或网络权限。
+
+## 维护记录
+
+- [Kotlin 插件修复与严格验证](docs/KOTLIN_PLUGIN_FIX.md)
+
+- [Lint 清理、依赖版本与验证记录](docs/LINT_CLEANUP.md)
+
+- [问题与提交对应表](docs/CHANGES.md)
+- [实际验证结果与截图](docs/VERIFICATION.md)
+- [实施计划](docs/superpowers/plans/2026-10-30-timetable-refresh.md)
+- [独立审阅的后续修复](docs/REVIEW.md)
+
+## 开源许可
+
+[MIT](LICENSE)。前身：[TimeSync_EduAlert](https://github.com/fuarthur/TimeSync_EduAlert)。

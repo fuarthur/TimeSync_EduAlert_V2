@@ -4,85 +4,95 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.room.Room
+import androidx.lifecycle.repeatOnLifecycle
 import com.ams.timesyncedualertv2.R
-import com.ams.timesyncedualertv2.db.AppDatabase
+import com.ams.timesyncedualertv2.TimeSyncApplication
+import com.ams.timesyncedualertv2.model.CourseEntity
 import com.ams.timesyncedualertv2.util.NotificationUtils
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 class CourseDetailsActivity : AppCompatActivity() {
+    private var current: CourseEntity? = null
+    private var deleting = false
+    private val repository
+        get() = (application as TimeSyncApplication).repository
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreate(state: Bundle?) {
+        super.onCreate(state)
         setContentView(R.layout.activity_course_details)
-
-        val buttonBack = findViewById<Button>(R.id.button_back)
-        val buttonEditCourse = findViewById<Button>(R.id.button_edit_course)
-        val buttonDeleteCourse = findViewById<Button>(R.id.button_delete_course)
-
-        val courseName = intent.getStringExtra("course_name")
-        val courseLocation = intent.getStringExtra("course_location")
-        val courseStartTime = intent.getStringExtra("course_start_time")
-        val courseEndTime = intent.getStringExtra("course_end_time")
-        val courseDescription = intent.getStringExtra("course_description")
-        val courseId = intent.getIntExtra("course_id", -1)
-
-        val courseNameTextView = findViewById<TextView>(R.id.textView_course_name)
-        val courseLocationTextView = findViewById<TextView>(R.id.textView_course_location)
-        val courseTimeTextView = findViewById<TextView>(R.id.textView_course_time)
-        val courseDescriptionTextView = findViewById<TextView>(R.id.textView_course_description)
-
-        courseNameTextView.text = courseName
-        courseLocationTextView.text = courseLocation
-        courseTimeTextView.text = getString(R.string.course_time_format, courseStartTime, courseEndTime)
-        courseDescriptionTextView.text = courseDescription
-
-        // 获取数据库实例
-        val db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "courses.db"
-        ).build()
-        val courseDao = db.courseDao()
-
-        buttonBack.setOnClickListener {
-            finish()
+        Ui.setup(this) { finish() }
+        val id = intent.getIntExtra("course_id", -1)
+        findViewById<Button>(R.id.button_edit_course).setOnClickListener {
+            startActivity(Intent(this, CourseActivity::class.java).putExtra("course_id", id))
         }
-
-        // 编辑课程点击事件
-        buttonEditCourse.setOnClickListener {
-            val intent = Intent(this, CourseActivity::class.java).apply {
-                putExtra("course_id", courseId)
-                putExtra("course_name", courseName)
-                putExtra("course_location", courseLocation)
-                putExtra("course_start_time", courseStartTime)
-                putExtra("course_end_time", courseEndTime)
-                putExtra("course_description", courseDescription)
+        findViewById<Button>(R.id.button_duplicate_course).apply {
+            visibility = android.view.View.VISIBLE
+            setOnClickListener {
+                startActivity(
+                    Intent(this@CourseDetailsActivity, CourseActivity::class.java)
+                        .putExtra("duplicate_id", id),
+                )
             }
-            startActivity(intent)
         }
-
-        // 删除课程点击事件
-        buttonDeleteCourse.setOnClickListener {
-            lifecycleScope.launch {
-                val course = courseDao.getCourseById(courseId)
-                if (course != null) {
-                    NotificationUtils.cancelNotificationForCourse(this@CourseDetailsActivity, course)
-                    courseDao.delete(course)
-                    NotificationUtils.refreshReminders(this@CourseDetailsActivity, lifecycleScope)
-                    runOnUiThread {
-                        Toast.makeText(this@CourseDetailsActivity, "Course deleted successfully", Toast.LENGTH_SHORT).show()
-                        val intent = Intent(this@CourseDetailsActivity, HomepageActivity::class.java)
-                        startActivity(intent)
-                        finish()
+        findViewById<Button>(R.id.button_delete_course).setOnClickListener {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.delete_course)
+                .setMessage(R.string.delete_confirm)
+                .setNegativeButton(R.string.cancel, null)
+                .setPositiveButton(R.string.delete) { _, _ -> deleteCourse(id) }
+                .show()
+        }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                repository.courses.collect { courses ->
+                    val c = courses.firstOrNull { it.id == id }
+                    if (c == null) {
+                        if (!deleting) finish()
+                        return@collect
                     }
-                } else {
-                    runOnUiThread {
-                        Toast.makeText(this@CourseDetailsActivity, "Course not found", Toast.LENGTH_SHORT).show()
-                    }
+                    current = c
+                    findViewById<TextView>(R.id.textView_course_name).text = c.name
+                    findViewById<TextView>(R.id.textView_course_time).text =
+                        getString(
+                            R.string.course_schedule_format,
+                            c.weekday
+                                .filter { it in 1..7 }
+                                .joinToString(", ") {
+                                    getString(Ui.dayNames[it - 1])
+                                },
+                            getString(R.string.course_time_format, c.startTime, c.endTime),
+                        )
+                    findViewById<TextView>(R.id.textView_course_location).text =
+                        c.location.ifBlank { getString(R.string.no_location) }
+                    findViewById<TextView>(R.id.textView_course_description).text =
+                        c.description.ifBlank { getString(R.string.no_notes) }
                 }
+            }
+        }
+    }
+
+    private fun deleteCourse(id: Int) {
+        if (deleting) return
+        deleting = true
+        lifecycleScope.launch {
+            try {
+                val deleted = repository.delete(id)
+                if (deleted != null)
+                    setResult(
+                        RESULT_OK,
+                        Intent().putExtra("deleted_course", com.google.gson.Gson().toJson(deleted)),
+                    )
+                NotificationUtils.refreshReminders(this@CourseDetailsActivity, lifecycleScope)
+                finish()
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                deleting = false
+                Ui.error(this@CourseDetailsActivity, e)
             }
         }
     }
